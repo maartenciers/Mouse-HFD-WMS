@@ -2,7 +2,9 @@
 *.pdf
 *.txt
 *.csv
-*.excel
+*.tsv
+*.xlsx
+*.zip
 *.RData
 data/
 tables/
