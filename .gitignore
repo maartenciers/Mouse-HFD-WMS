@@ -1,1 +1,12 @@
-test/test.txt
+*.png
+*.pdf
+*.txt
+*.csv
+*.tsv
+*.xlsx
+*.zip
+*.RData
+data/
+tables/
+*/tables/
+*/figures/
