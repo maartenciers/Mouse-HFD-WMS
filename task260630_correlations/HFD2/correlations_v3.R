@@ -35,7 +35,7 @@ library("Maaslin2")
 library("tidyverse")
 
 getwd()
-setwd("~/YanomamiMouseHFD/")
+setwd("~/Mouse-HFD-WMS/")
 getwd()
 
 list.dirs()
@@ -49,7 +49,7 @@ for (i in c(path.wk.dir)) {
   
 }; rm(i)
 
-my.exp <- "HFD1"
+my.exp <- "HFD2"
 
 path.fg.dir <- paste0(path.wk.dir, "/", my.exp ,"/figures")
 path.tb.dir <- paste0(path.wk.dir, "/", my.exp,  "/tables")
@@ -349,34 +349,30 @@ fun.get.boxp.compm1 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = 
     gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                          fill = .data[[gp_fill]], color = .data[[gp_col]])) +
       facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-      geom_point(shape = 21, color = "white", size = 2.5, position = position_jitter(w = 0.2, h = 0, seed = 123)) +  
-      #eom_jitter(shape = 16, alpha = 1, size = 1, width = .25, height = 0) + 
-      #geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-      stat_summary(aes(group = .data[[gp_comp]]), geom = "crossbar", fun = "mean", color = "black", width = 0.5, linewidth = .25) +
+      geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+      geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
       ggpubr::stat_pvalue_manual(
         tb.brackets,
-        vjust = -1,
+        vjust = -0.5,
         xmin = "group1",
         xmax = "group2",
         y.position = "y.position",
         label = "label",
         tip.length = 0.01,
         bracket.size = 0.25,
-        size = 2.5,
+        size = 2.75,
         hide.ns = only.sig,
         inherit.aes = FALSE
       ) +
       scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
       scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
+      scale_y_continuous(expand = expansion(mult = c(0.05, 0.15))) +
       coord_cartesian(clip = "off") +
       ylab("") + xlab("") +
       my.theme.1 + 
       theme(legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+            panel.spacing = unit(1, "cm"), 
+            axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
     
     return(gg)
     
@@ -385,107 +381,17 @@ fun.get.boxp.compm1 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = 
   gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                        fill = .data[[gp_fill]], color = .data[[gp_col]])) +
     facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-    geom_point(shape = 21, color = "white", size = 2.5, position = position_jitter(w = 0.2, h = 0, seed = 123)) +  
-    #eom_jitter(shape = 16, alpha = 1, size = 1, width = .25, height = 0) + 
-    #geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-    stat_summary(aes(group = .data[[gp_comp]]), geom = "crossbar", fun = "mean", color = "black", width = 0.5, linewidth = .25) +
-    
+    geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+    geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
     scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
     scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
+    scale_y_continuous(expand = expansion(mult = c(0.05, 0.15))) +
     coord_cartesian(clip = "off") +
     ylab("") + xlab("") +
     my.theme.1 + 
     theme(legend.position = "none",
-          legend.title = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
-  
-  return(gg)
-  
-}
-
-
-fun.get.boxp.compm2 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = NULL,
-                                gp_facet, group_var, value_var, only.sig = F, alpha = 0.1, 
-                                label.type = "stars") {
-  
-  if (is.null(gp_fill)) { gp_fill = gp_comp }
-  if (is.null(gp_col)) { gp_col = gp_comp }
-  
-  tb.brackets <- fun.get.brackets(
-    tb = tb,
-    tb.compm = tb.compm,
-    gp_facet = gp_facet,
-    gp_comp = gp_comp,
-    value_var = value_var,
-    only.sig = only.sig,
-    alpha = alpha,
-    label.type = label.type
-  )
-  
-  if (nrow(tb.brackets) > 0) {
-    
-    gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
-                         fill = .data[[gp_fill]], color = .data[[gp_col]])) +
-      facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-      geom_line(aes(group = .data[[group_var]]), color = "black", alpha = .25, linewidth = .25, 
-                position = position_jitter(w = 0.2, h = 0, seed = 123)) +
-      geom_point(shape = 21, color = "white", size = 2.5, position = position_jitter(w = 0.2, h = 0, seed = 123)) +  
-      #eom_jitter(shape = 16, alpha = 1, size = 1, width = .25, height = 0) + 
-      #geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-      stat_summary(aes(group = .data[[gp_comp]]), geom = "crossbar", fun = "mean", color = "black", width = 0.5, linewidth = .25) +
-      ggpubr::stat_pvalue_manual(
-        tb.brackets,
-        vjust = -1,
-        xmin = "group1",
-        xmax = "group2",
-        y.position = "y.position",
-        label = "label",
-        tip.length = 0.01,
-        bracket.size = 0.25,
-        size = 2.5,
-        hide.ns = only.sig,
-        inherit.aes = FALSE
-      ) +
-      scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
-      coord_cartesian(clip = "off") +
-      ylab("") + xlab("") +
-      my.theme.1 + 
-      theme(legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
-    
-    return(gg)
-    
-  }
-  
-  gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
-                       fill = .data[[gp_fill]], color = .data[[gp_col]])) +
-    facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-    geom_line(aes(group = .data[[group_var]]), color = "black", alpha = .25, linewidth = .25, 
-              position = position_jitter(w = 0.2, h = 0, seed = 123)) +
-    geom_point(shape = 21, color = "white", size = 2.5, position = position_jitter(w = 0.2, h = 0, seed = 123)) +  
-    #eom_jitter(shape = 16, alpha = 1, size = 1, width = .25, height = 0) + 
-    #geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-    stat_summary(aes(group = .data[[gp_comp]]), geom = "crossbar", fun = "mean", color = "black", width = 0.5, linewidth = .25) +
-    
-    scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
-    coord_cartesian(clip = "off") +
-    ylab("") + xlab("") +
-    my.theme.1 + 
-    theme(legend.position = "none",
-          legend.title = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+          panel.spacing = unit(1, "cm"), 
+          axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
   
   return(gg)
   
@@ -507,7 +413,8 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
     value_var = value_var,
     only.sig = only.sig,
     alpha = alpha,
-    label.type = label.type
+    label.type = label.type,
+    step.mult = 0.15
   )
   
   tb.global <- tb.kruskal %>%
@@ -523,18 +430,15 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
     gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                          fill = .data[[gp_fill]], color = .data[[gp_col]])) +
       facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-      geom_point(shape = 21, color = "white", size = 2.5, position = position_jitter(w = 0.2, h = 0, seed = 123)) +  
-      #eom_jitter(shape = 16, alpha = 1, size = 1, width = .25, height = 0) + 
-      #geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-      stat_summary(aes(group = .data[[gp_comp]]), geom = "crossbar", fun = "mean", color = "black", width = 0.5, linewidth = .25) +
-      #stat_summary(fun = "mean", color = "black", fill = "white", shape = 23, size = 0.25, stroke = 0.25) +
+      geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+      geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
       geom_text(
         data = tb.global,
         aes(x = 0.5, y = Inf, label = p.full),
         inherit.aes = FALSE,
         vjust = 2,
         hjust = 0,
-        size = 2,
+        size = 2.75,
         color = "black"
       ) +
       ggpubr::stat_pvalue_manual(
@@ -545,21 +449,19 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
         label = "label",
         tip.length = 0.01,
         bracket.size = 0.25,
-        size = 2.5,
+        size = 2.75,
         hide.ns = only.sig,
         inherit.aes = FALSE
       ) +
       scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
       scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_y_continuous(expand = expansion(mult = c(0.1, 0.35))) +
+      scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
       coord_cartesian(clip = "off") +
       ylab("") + xlab("") +
       my.theme.1 + 
       theme(legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+            panel.spacing = unit(1, "cm"), 
+            axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
     
     return(gg)
     
@@ -569,37 +471,31 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
   gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                        fill = .data[[gp_fill]], color = .data[[gp_col]])) +
     facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-    geom_point(shape = 21, color = "white", size = 2.5, position = position_jitter(w = 0.2, h = 0, seed = 123)) +  
-    #eom_jitter(shape = 16, alpha = 1, size = 1, width = .25, height = 0) + 
-    #geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-    stat_summary(aes(group = .data[[gp_comp]]), geom = "crossbar", fun = "mean", color = "black", width = 0.5, linewidth = .25) +
-    #stat_summary(fun = "mean", color = "black", fill = "white", shape = 23, size = 0.25, stroke = 0.25) +
+    geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+    geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
     geom_text(
       data = tb.global,
       aes(x = 0.5, y = Inf, label = p.full),
       inherit.aes = FALSE,
       vjust = 2,
       hjust = 0,
-      size = 2,
+      size = 2.75,
       color = "black"
     ) +
     
     scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
     scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_y_continuous(expand = expansion(mult = c(0.1, 0.35))) +
+    scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
     coord_cartesian(clip = "off") +
     ylab("") + xlab("") +
     my.theme.1 + 
     theme(legend.position = "none",
-          legend.title = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+          panel.spacing = unit(1, "cm"), 
+          axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
   
   return(gg)
   
 }
-
 
 fun.get.flatten.corr.mt <- function(cormat, pmat) {
   
@@ -639,10 +535,10 @@ tb.metad <-
   mutate(donor_ethnicity_timepoint = factor(donor_ethnicity_timepoint, unique(.$donor_ethnicity_timepoint))); head(tb.metad)
 
 tmp.clinic <-
-  openxlsx::read.xlsx(xlsxFile = paste0(getwd(), "/misc/clinical-data-HFD.xlsx"), sheet = 1) %>% 
+  openxlsx::read.xlsx(xlsxFile = paste0(getwd(), "/misc/clinical-data-HFD-new.xlsx"), sheet = 1) %>% 
   filter(experiment == my.exp) %>% 
   select(!contains("_log10")) %>% 
-  select(-c(donor_ethnicity:mouse_id), -c(weight_pre, weight_post, liver_weight, eWAT_weight, FFA_3_4_5)) %>% 
+  #select(-c(donor_ethnicity:mouse_id), -c(weight_pre, weight_post, liver_weight, eWAT_weight, FFA_3_4_5)) %>% 
   rename(FFA = FFA_1_2)
 
 tmp.order <- c(
@@ -650,8 +546,9 @@ tmp.order <- c(
   "weight_delta",
   
   # Adiposity
-  "eWAT_relative_weight",
+  "eWAT_weight",
   "adipocyte_area",
+  "LAM_density",
   
   # Glucose homeostasis
   "fasting_blood_glucose",
@@ -674,7 +571,7 @@ tmp.order <- c(
   "IFNg_serum",
   
   # Liver phenotype
-  "liver_relative_weight",
+  "liver_weight",
   "ALT_activity",
   "ORO_liver",
   "liver_pathology",
@@ -757,109 +654,76 @@ ps.table.tss <- phyloseq_standardize_otu_abundance(physeq = ps.table, method = '
 rm(list = ls(pattern = "^ls."))
 rm(list = ls(pattern = "^tmp."))
 
-
-### Func data ------------------------------------------------------------------
-
-
-tb.work.fun.ko <- 
-  openxlsx::read.xlsx(xlsxFile = str_glue("{getwd()}/task260619_functional-profiler/{my.exp}/tables/profiles/tb-work-ko.xlsx"), sheet = 1)
-
-#KO
-ls.info.ko <- list()
-
-ls.info.ko[["def"]] <- read.delim("misc/ko-info/KOs_table_wide.tsv") %>% select(ko_id = L4, D1:D4) %>% mutate_if(is.character, str_trim)
-ls.info.ko[["md"]] <- read.delim("misc/ko-info/modules_steps.tsv") %>% mutate_if(is.character, str_trim)
-
-tb.aux.ann.ko <-
-  ls.info.ko[["def"]] %>%
-  select(ko_class = D1, ko_subclass = D2) %>%
-  distinct() %>%
-  filter(! ko_class %in% c("Not Included in Pathway or Brite",
-                           "Human Diseases",
-                           "Brite Hierarchies",
-                           "Organismal Systems")) %>%
-  mutate(ko_class = factor(ko_class, c("Metabolism",
-                                       "Cellular Processes",
-                                       "Genetic Information Processing",
-                                       "Environmental Information Processing"))) %>%
-  arrange(ko_class, ko_subclass)
-
-tb.aux.ann.ko.def <-
-  ls.info.ko[["def"]] %>%
-  select(ko_id, ko_class = D1, ko_subclass = D2, ko_pathway = D3) %>%
-  distinct() %>%
-  filter(! ko_class %in% c("Not Included in Pathway or Brite",
-                           "Human Diseases",
-                           "Brite Hierarchies",
-                           "Organismal Systems")) %>%
-  mutate(ko_class = factor(ko_class, c("Metabolism",
-                                       "Cellular Processes",
-                                       "Genetic Information Processing",
-                                       "Environmental Information Processing"))) %>%
-  arrange(ko_id, ko_class, ko_subclass)
-
-tb.aux.ann.ko.met <-
-  ls.info.ko[["def"]] %>%
-  select(ko_class = D1, ko_subclass = D2, ko_pathway = D3) %>%
-  distinct() %>%
-  filter(ko_class %in% c("Metabolism") & ! ko_subclass %in% c("Not included in regular maps")) %>%
-  arrange(ko_class, ko_subclass, ko_pathway) %>%
-  mutate(across(.cols = ko_class:ko_subclass, .fns = ~factor(., unique(.))))
+save.image(paste0(path.wk.dir, "/", my.exp,  "/tmp.RData"))
 
 
 ## Graph settings --------------------------------------------------------------
 
 
 # Themes
-my.theme.1 <-
-  theme_bw(base_family = "Liberation Sans") +
-  theme(legend.position = "none",
+my.theme.1 <- 
+  theme_bw(base_family = "Liberation Sans") + 
+  theme(legend.position = "none", 
         legend.text = element_text(size = 8, colour = 'black'),
         legend.title = element_blank(),
         legend.justification = c(0.5, 0.5),
-        strip.text = element_text(size = 10, colour = 'black', face = "bold"),
+        
+        strip.text = element_text(size = 10, colour = 'black'),
         strip.background = element_rect(fill = NA, colour = NA),
+        strip.clip = "off",
+        
         panel.background = element_rect(fill = "white"),
         panel.grid.minor = element_blank(),
-        panel.grid.major = element_line(color = "gray95", linewidth = 0.5, linetype = 1),
-        panel.border = element_rect(color = "black", linewidth = 0, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.border = element_blank(),
+        panel.spacing = unit(.1, "lines"),
+        
         axis.ticks = element_line(color = "black", linewidth = .25),
-        axis.ticks.length = unit(1, "pt"),
+        axis.ticks.length = unit(2.5, "pt"),
+        
         axis.line.x = element_line(colour = 'black', linewidth = 0.25),
         axis.line.y = element_line(colour = 'black', linewidth = 0.25),
-        axis.title.x = element_text(size = 10, face = 'bold', colour = 'black'),
-        axis.title.y = element_text(size = 10, face = 'bold', colour = 'black'),
-        axis.title.y.right = element_text(size = 10, face = 'bold', colour = 'black'),
-        axis.text.x = element_text(size = 6, colour = 'black'),
-        axis.text.y = element_text(size = 6, colour = 'black'),
+        axis.title.x = element_text(size = 10, colour = 'black'),
+        axis.title.y = element_text(size = 10, colour = 'black'),
+        axis.title.y.right = element_text(size = 10, colour = 'black'),
+        axis.text.x = element_text(size = 8, colour = 'black'),
+        axis.text.y = element_text(size = 8, colour = 'black'),
         plot.title = element_text(size = 10, face = 'bold', colour = 'black'),
         plot.subtitle = element_text(size = 6, colour = 'black'),
         plot.margin = unit(c(0.5, 0.75, 0.5, 0.75), 'cm'))
 
-my.theme.2 <-
-  theme_bw(base_family = "Liberation Sans") +
-  theme(legend.position = "none",
+my.theme.2 <- 
+  theme_bw(base_family = "Liberation Sans") + 
+  theme(legend.position = "none", 
         legend.text = element_markdown(size = 8, colour = 'black'),
         legend.title = element_blank(),
         legend.justification = c(0.5, 0.5),
-        strip.text = element_markdown(size = 10, colour = 'black', face = "bold"),
+        
+        strip.text = element_markdown(size = 10, colour = 'black'),
         strip.background = element_rect(fill = NA, colour = NA),
+        strip.clip = "off",
+        
         panel.background = element_rect(fill = "white"),
         panel.grid.minor = element_blank(),
-        panel.grid.major = element_line(color = "gray95", linewidth = 0.5, linetype = 1),
-        panel.border = element_rect(color = "black", linewidth = 0, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.border = element_blank(),
+        panel.spacing = unit(.1, "lines"),
+        
         axis.ticks = element_line(color = "black", linewidth = .25),
-        axis.ticks.length = unit(1, "pt"),
+        axis.ticks.length = unit(2.5, "pt"),
+        
         axis.line.x = element_line(colour = 'black', linewidth = 0.25),
         axis.line.y = element_line(colour = 'black', linewidth = 0.25),
-        axis.title.x = element_markdown(size = 10, face = 'bold', colour = 'black'),
-        axis.title.y = element_markdown(size = 10, face = 'bold', colour = 'black'),
-        axis.title.y.right = element_markdown(size = 10, face = 'bold', colour = 'black'),
-        axis.text.x = element_markdown(size = 6, colour = 'black'),
-        axis.text.y = element_markdown(size = 6, colour = 'black'),
+        axis.title.x = element_markdown(size = 10, colour = 'black'),
+        axis.title.y = element_markdown(size = 10, colour = 'black'),
+        axis.title.y.right = element_markdown(size = 10, colour = 'black'),
+        axis.text.x = element_markdown(size = 8, colour = 'black'),
+        axis.text.y = element_markdown(size = 8, colour = 'black'),
+        
         plot.title = element_markdown(size = 10, face = 'bold', colour = 'black'),
         plot.subtitle = element_markdown(size = 6, colour = 'black'),
         plot.margin = unit(c(0.5, 0.75, 0.5, 0.75), 'cm'))
+
 
 # Colors
 colors.gp <- c("#FFA500FF", "#0072B2FF")
@@ -870,12 +734,6 @@ names(colors.gp.tp) <- levels(tb.metad$donor_ethnicity_timepoint)
 
 colors.tax <- c("#B06888FF", "#5080C8FF", "#E8B800FF", "#18C898FF", "#F88048FF", "#C8C8C8FF", "#303028FF")
 names(colors.tax) <- c("p: Bacillota", "p: Bacteroidota", "p: Verrucomicrobiota", "p: Pseudomonadota", "p: Actinomycetota", "Other: Bacteria", "Other: Domains")
-
-colors.ko <- c("#F4C40FFF", "#E6352FFF", "#3D79F3FF", "#34A74BFF")
-names(colors.ko) <- levels(tb.aux.ann.ko$ko_class)
-
-colors.ko.met <- c("#F4C40FFF", "#FE9B00FF", "#D8443CFF", "#633372FF", "#9F5691FF", "#DE597CFF", "#E6A2A6FF",  "#92C051FF", "#2B9B81FF", "#78A5C3FF", "#1F6E9CFF")
-names(colors.ko.met) <- levels(tb.aux.ann.ko.met$ko_subclass)
 
 colors.msl <- c("#67001FFF", "#B2182BFF", "#F4A582FF", "#D1E5F0FF", "#2166ACFF", "#053061FF")
 names(colors.msl) <- c("[1, Inf)", "[0.5, 1)", "[0, 0.5)", "(−0.5, 0)", "(−1, −0.5]", "(-Inf, −1]")
@@ -920,29 +778,6 @@ gg.leg.tax <-
 
 gg.leg.tax <- ggpubr::as_ggplot(ggpubr::get_legend(gg.leg.tax)); gg.leg.tax
 
-gg.leg.ko <-
-  ggplot(tb.aux.ann.ko, aes(x = 1, y = ko_class, fill = ko_class)) +
-  geom_point(shape = 22, size = 3) +
-  scale_fill_manual(name = "KEGG annotation", values = colors.ko) +
-  my.theme.1 +
-  theme(legend.position = "right",
-        legend.title = element_text(size = 8, colour = 'black', face = "bold"),
-        legend.text = element_text(size = 7, colour = 'black', margin = margin(0, 0, 0, 2)),
-        legend.key.size = unit(.5, 'lines'),
-        legend.justification = c(0, .5))
-gg.leg.ko <- ggpubr::as_ggplot(ggpubr::get_legend(gg.leg.ko)); gg.leg.ko
-
-gg.leg.ko.met <-
-  ggplot(tb.aux.ann.ko.met, aes(x = 1, y = ko_subclass, fill = ko_subclass)) +
-  geom_point(shape = 22, size = 3) +
-  scale_fill_manual(name = "KEGG Metabolism annotation", values = colors.ko.met) +
-  my.theme.1 +
-  theme(legend.position = "right",
-        legend.title = element_text(size = 8, colour = 'black', face = "bold"),
-        legend.text = element_text(size = 7, colour = 'black', margin = margin(0, 0, 0, 2)),
-        legend.key.size = unit(.5, 'lines'),
-        legend.justification = c(0, .5))
-gg.leg.ko.met <- ggpubr::as_ggplot(ggpubr::get_legend(gg.leg.ko.met)); gg.leg.ko.met
 
 gg.leg.msl <-
   ggplot(names(colors.msl) %>% data.frame() %>% mutate(across(everything(), .fns = ~factor(., unique(.)))), aes(x = 1, y = ., fill = .)) +
@@ -958,18 +793,19 @@ gg.leg.msl <-
 gg.leg.msl <- ggpubr::as_ggplot(ggpubr::get_legend(gg.leg.msl)); gg.leg.msl
 
 
-gg.leg.all <- gg.leg.gp + gg.leg.gp.tp + gg.leg.tax + gg.leg.ko + gg.leg.ko.met + gg.leg.msl + plot_layout(ncol = 1, heights = c(3, 5, 8, 5, 12, 7))
+gg.leg.all <- gg.leg.gp + gg.leg.gp.tp + gg.leg.tax + gg.leg.msl + plot_layout(ncol = 1, heights = c(3, 5, 8, 7))
 gg.leg.all
 
-png(filename = paste0(path.fg.dir, "/legends.png"), width = 5000 * .65, height = 5000 * 1.75, units = "px", res = 1200, type = "cairo")
+{
+  png(filename = paste0(path.fg.dir, "/legends.png"), width = 5000 * .65, height = 5000 * 1.25, units = "px", res = 1200, type = "cairo")
+  
+  print(gg.leg.all)
+  
+  dev.off()
+}
 
-gg.leg.all
 
-dev.off()
-
-
-# Correlations -----------------------------------------------------------------
-
+# Correlations (Clinical) ------------------------------------------------------
 
 ## Taxa - Meta -----------------------------------------------------------------
 
@@ -1053,11 +889,32 @@ ls.glom.ps.filt <- list(
   
 )
 
-ranks <- c("Phylum", "Class", "Order", "Family", "Genus")
+save.image(paste0(path.wk.dir, "/", my.exp,  "/tmp.RData"))
 
-top.phylum <- c("Bacillota", "Bacteroidota", "Verrucomicrobiota", "Pseudomonadota", "Actinomycetota")
 
-# MaAsLin2
+## MaAsLin2 --------------------------------------------------------------------
+
+
+tmp.path <- path.tb.dir %>% str_replace(., "task260630_correlations", "task260615_tax-profiler")
+
+ranks <- c("Genus")
+
+comps <- c("Belgian: post-HFD|Yanomami: post-HFD")
+
+top.phylum <- c("p: Bacillota", "p: Bacteroidota", "p: Verrucomicrobiota", "p: Pseudomonadota", "p: Actinomycetota", "Other: Bacteria", "Other: Domains")
+
+df.msl.taxa.raw <- 
+  openxlsx::read.xlsx(xlsxFile = paste0(tmp.path, "/diff_abund/maaslin.xlsx"), rowNames = F, sheet = 1) %>% 
+  filter(rank %in% ranks) %>% 
+  filter(comp %in% comps) %>% 
+  mutate(Phylum2 = factor(Phylum2, top.phylum)) %>% 
+  filter(qval <= 0.05 & abs(coef) >= 1) %>% 
+  mutate(enrich_group = factor(enrich_group, levels(tb.metad$donor_ethnicity_timepoint)))
+
+
+rm(tmp.path, comps)
+
+### w/o Et as random eff -------------------------------------------------------
 
 tmp.comps <- c("Belgian: post-HFD|Yanomami: post-HFD")
 
@@ -1118,7 +975,7 @@ for (i in seq_along(ranks)) {
                correction = "BH",
                fixed_effects = c(tmp.var),
                min_abundance = 0.01,
-               #min_prevalence = 0.5,
+               #min_prevalence = 0.4,
                plot_heatmap = F, 
                plot_scatter = F); head(tmp.msl.comp)
     
@@ -1161,7 +1018,7 @@ tmp.tb.tax.ann <-
   filter(Phylum2 != "Unassigned") %>% 
   mutate(Phylum2 = factor(Phylum2, names(colors.tax)))
 
-df.msl.taxa.meta.raw <- 
+df.msl.taxa.meta.raw.1 <- 
   bind_rows(tmp.ls.msl.meta) %>% 
   mutate(comp = factor(comp, levels = unique(comp))) %>% 
   mutate(rank = factor(rank, levels = ranks)) %>% 
@@ -1171,501 +1028,432 @@ df.msl.taxa.meta.raw <-
   arrange(rank, metadata, -abs(coef), qval) %>% 
   filter(!str_detect(feature, "Un.\\)$"))
 
-df.msl.taxa.meta.filt <- df.msl.taxa.meta.raw %>% filter(qval < 0.1)
+rm(list = ls(pattern = "^tmp."))
 
-df.msl.taxa.meta <- list("Raw" = df.msl.taxa.meta.raw, "Filtered" = df.msl.taxa.meta.filt)
-
-openxlsx::write.xlsx(x = df.msl.taxa.meta, file = paste0(path.tb.dir, "/maaslin_taxa-meta.xlsx"), rowNames = F)
-
-# Graph
-
-tmp.corr.flatted <-
-  df.msl.taxa.meta.raw %>% 
-  filter(rank == "Genus") %>% 
-  mutate(sig.f = case_when(
-    qval <= 0.1 ~ "*", 
-    #qval > 0.1 & pval < 0.05 ~ "+",
-    .default = "")
-  ) %>% 
-  mutate(r.tier = case_when(
-    coef >=  1 ~ "[1, Inf)",
-    coef >=  0.50 & coef <  1 ~ "[0.5, 1)",
-    coef >=  0.00 & coef <  0.50 ~ "[0, 0.5)",
-    coef >  -0.50 & coef <  0.00 ~ "(−0.5, 0)",
-    coef >  -1 & coef <= -0.50 ~ "(−1, −0.5]",
-    coef <= -1 ~ "(-Inf, −1]",
-  )) %>% 
-  mutate(r.color = ifelse(abs(coef) >= 1, "white", "black")) %>% 
-  mutate(r.tier = factor(r.tier, c("[1, Inf)", "[0.5, 1)", "[0, 0.5)", "(−0.5, 0)", "(−1, −0.5]", "(-Inf, −1]")))
-
-tmp.taxa.has.sig <- tmp.corr.flatted %>% filter(sig.f != "") %>% pull(feature) %>% unique()
-
-tmp.corr.flatted.filt <- 
-  tmp.corr.flatted %>% 
-  #filter(feature %in% tmp.taxa.has.sig) %>% 
-  rename(metad = metadata) %>% 
-  mutate(feature2 = str_glue("{feature} (B={`Belgian: post-HFD`};Y={`Yanomami: post-HFD`})"))
-
-tmp.gg.msl.1 <- 
-  ggplot(tmp.corr.flatted.filt, aes(x = metad, y = feature2, fill = r.tier)) +
-  geom_tile(colour = "white", size = .25) +
-  geom_text(aes(label = sig.f, color = r.color), size = 2.5, hjust= .5, vjust = .75, , fontface='bold') +
-  scale_color_identity() +
-  scale_fill_manual(values = colors.msl) + 
-  xlab("") + ylab("") +
-  my.theme.1 + 
-  theme(axis.text.x = element_text(size = 6.5, angle = 45, hjust = 1, vjust = 1),
-        plot.margin = unit(c(0, 0, 0, .5), 'cm')); tmp.gg.msl.1
-
-tmp.gg.msl.2 <-
-  ggplot(tmp.corr.flatted.filt, aes(x = 1, y = feature2, fill = Phylum2)) +
-  geom_tile(colour = "white", size = .25) +
-  scale_fill_manual(name = "", values = colors.tax) +
-  scale_color_identity(name = "") +
-  xlab("") + ylab("") +
-  my.theme.1 +
-  theme(panel.border = element_rect(colour = "#00000000", fill = NA),
-        strip.text.y = element_blank(),
-        axis.line.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line.x = element_line(color = "#00000000"),
-        axis.text.x = element_text(colour = '#00000000'),
-        axis.ticks.x = element_line(color = "#00000000"),
-        plot.margin = unit(c(0, .5, 0, -1), 'cm'))
-
-print(tmp.gg.msl.1 + plot_spacer() + tmp.gg.msl.2 + (gg.leg.msl/gg.leg.tax) + plot_layout(nrow = 1, widths = c(.75, -.1, .04, 1.25)))
-
-png(filename = paste0(path.fg.dir, "/maaslin_taxa-meta.png"), width = 5000 * 2, height = 170 * (length(unique(tmp.corr.flatted.filt$feature)) + 7), units = "px", res = 1200, type = "cairo")
-
-print(tmp.gg.msl.1 + plot_spacer() + tmp.gg.msl.2 + (gg.leg.msl/gg.leg.tax) + plot_layout(nrow = 1, widths = c(.75, -.1, .04, 1.25)))
-
-dev.off()
-
-rm(list = ls(pattern = "[.]?tmp[.]?"))
-
-
-## Functional - Meta -----------------------------------------------------------
-
-
-### KO subclass ----------------------------------------------------------------
-
-
-# PSfying
-
-tmp.level <- "ko_subclass"
-
-tmp.ko.glom.counts <-
-  tb.work.fun.ko %>%
-  select(ortholog_id, ko_class, !!as.symbol(tmp.level), tb.metad$sample_id) %>%
-  distinct() %>%
-  group_by(ko_class, !!as.symbol(tmp.level)) %>%
-  summarise(across(.cols = tb.metad$sample_id, ~ sum(.x, na.rm = TRUE)), .groups = "drop") %>%
-  arrange(ko_class, !!as.symbol(tmp.level)) %>%
-  data.frame(check.names = F)
-
-tmp.tb.metad <- tb.metad %>% rename(ID = sample_id)
-tmp.tb.count <- tmp.ko.glom.counts %>% select(ID = !!as.symbol(tmp.level), tmp.tb.metad$ID)
-
-tmp.tb.taxon <-
-  tmp.ko.glom.counts %>%
-  mutate(Kingdom = !!as.symbol(tmp.level),
-         Phylum = !!as.symbol(tmp.level),
-         Class = !!as.symbol(tmp.level),
-         Order = !!as.symbol(tmp.level),
-         Family = !!as.symbol(tmp.level),
-         Genus = !!as.symbol(tmp.level),
-         Species = !!as.symbol(tmp.level)) %>%
-  select(ID = !!as.symbol(tmp.level), Kingdom:Species)
-
-row.names(tmp.tb.count) <- tmp.tb.count$ID
-row.names(tmp.tb.taxon) <- tmp.tb.taxon$ID
-row.names(tmp.tb.metad) <- tmp.tb.metad$ID
-
-tmp.tb.count <- tmp.tb.count %>% select(-ID)
-tmp.tb.taxon <- tmp.tb.taxon %>% select(-ID)
-
-tmp.tb.count <- as.matrix(tmp.tb.count)
-tmp.tb.taxon <- as.matrix(tmp.tb.taxon)
-
-tmp.tb.count <- otu_table(tmp.tb.count, taxa_are_rows = TRUE)
-tmp.tb.taxon <- tax_table(tmp.tb.taxon)
-tmp.tb.metad <- sample_data(tmp.tb.metad)
-
-ps.table.ko.glom <- phyloseq(tmp.tb.count, tmp.tb.taxon, tmp.tb.metad)
-
-# MaAsLin2
+### w/ Et as random eff --------------------------------------------------------
 
 tmp.comps <- c("Belgian: post-HFD|Yanomami: post-HFD")
 
 tmp.ls.msl.meta <- list()
 
-tmp.meta.var <- names(tb.metad)[10:ncol(tb.metad)]
-
-for (j in seq_along(tmp.meta.var)) {
+for (i in seq_along(ranks)) {
   
-  tmp.var <- tmp.meta.var[[j]]
+  tmp.rank <- ranks[[i]]
   
-  tmp.comp.factor <- "donor_ethnicity_timepoint" 
-  tmp.comp <- tmp.comps[[1]]
+  tmp.meta.var <- names(tb.metad)[10:ncol(tb.metad)]
   
-  tmp.meta <- 
-    tb.metad %>% 
-    filter(!!as.symbol(tmp.comp.factor) %in% unlist(str_split(tmp.comp, "\\|"))) %>% 
-    column_to_rownames("sample_id") %>% 
-    select(any_of(c(tmp.comp.factor, tmp.var)))
+  for (j in seq_along(tmp.meta.var)) {
+    
+    tmp.var <- tmp.meta.var[[j]]
+    
+    tmp.comp.factor <- "donor_ethnicity_timepoint" 
+    tmp.comp.random <- "donor_ethnicity" 
+    tmp.comp <- tmp.comps[[1]]
+    
+    tmp.meta <- 
+      tb.metad %>% 
+      filter(!!as.symbol(tmp.comp.factor) %in% unlist(str_split(tmp.comp, "\\|"))) %>% 
+      column_to_rownames("sample_id") %>% 
+      select(any_of(c(tmp.comp.factor, tmp.comp.random, tmp.var)))
+    
+    tmp.tax.table <- 
+      ls.glom.ps.filt[[tmp.rank]] %>% 
+      subset_samples(., timepoint == "post-HFD") %>% 
+      prune_taxa(taxa_sums(.) > 0, .) %>% 
+      microbiome::transform(., "total")
+    
+    tmp.tax.table <- 
+      merge(
+        tax_table(tmp.tax.table), 
+        otu_table(tmp.tax.table), 
+        by = "row.names", all = T)[-1] %>% 
+      select(Kingdom:!!as.symbol(tmp.rank), 8:ncol(.)) %>% 
+      mutate(tmpID = paste0("tmpID.", 1:n()))
+    
+    tmp.prev.table <- 
+      tmp.tax.table %>% 
+      select(tmpID, any_of(rownames(tmp.meta))) %>% 
+      pivot_longer(cols = -tmpID, names_to = "tmp", values_to = "prev") %>% 
+      mutate(prev = ifelse(prev > 0, 1, 0)) %>% 
+      merge(tmp.meta, ., by.x = 0, by.y = "tmp") %>% 
+      group_by(tmpID, !!as.symbol(tmp.comp.factor)) %>% 
+      summarize(prev = sum(prev, na.rm = T)) %>% 
+      pivot_wider(names_from = tmp.comp.factor, values_from = "prev") %>% 
+      data.frame(check.names = F)
+    
+    tmp.rel.tax.id <- tmp.tax.table %>% select(tmpID, any_of(ranks[[i]]))
+    tmp.tax.table <- tmp.tax.table %>% column_to_rownames("tmpID") %>% select(any_of(rownames(tmp.meta)))
+    
+    tmp.msl.comp <- 
+      Maaslin2(input_data = tmp.tax.table, 
+               input_metadata = tmp.meta, 
+               output = "/tmp/",
+               normalization = "TSS",
+               correction = "BH",
+               fixed_effects = c(tmp.var),
+               random_effects = c(tmp.comp.random),
+               min_abundance = 0.01,
+               #min_prevalence = 0.4,
+               plot_heatmap = F, 
+               plot_scatter = F); head(tmp.msl.comp)
+    
+    tmp.ls.msl.meta[[ranks[[i]]]][[j]] <- 
+      merge(tmp.rel.tax.id, tmp.msl.comp$results, by.x = "tmpID", by.y = "feature") %>% 
+      merge(., tmp.prev.table) %>% 
+      mutate(comp = tmp.comp, rank = ranks[[i]]) %>% 
+      select(rank, feature = ranks[[i]], metadata, coef, stderr, pval, qval, 
+             N, N.not.zero, any_of(unlist(str_split(tmp.comp, pattern = "\\|"))), comp)
+    
+  }
   
-  tmp.tax.table <- 
-    ps.table.ko.glom %>% 
-    subset_samples(., timepoint == "post-HFD") %>% 
-    prune_taxa(taxa_sums(.) > 0, .) %>% 
-    microbiome::transform(., "total")
-  
-  tmp.tax.table <- 
-    merge(
-      tax_table(tmp.tax.table), 
-      otu_table(tmp.tax.table), 
-      by = "row.names", all = T)[-1] %>% 
-    select(Species, 8:ncol(.)) %>% 
-    mutate(tmpID = paste0("tmpID.", 1:n()))
-  
-  tmp.prev.table <- 
-    tmp.tax.table %>% 
-    select(tmpID, any_of(rownames(tmp.meta))) %>% 
-    pivot_longer(cols = -tmpID, names_to = "tmp", values_to = "prev") %>% 
-    mutate(prev = ifelse(prev > 0, 1, 0)) %>% 
-    merge(tmp.meta, ., by.x = 0, by.y = "tmp") %>% 
-    group_by(tmpID, !!as.symbol(tmp.comp.factor)) %>% 
-    summarize(prev = sum(prev, na.rm = T)) %>% 
-    pivot_wider(names_from = tmp.comp.factor, values_from = "prev") %>% 
-    data.frame(check.names = F)
-  
-  tmp.rel.tax.id <- tmp.tax.table %>% select(tmpID, Species)
-  tmp.tax.table <- tmp.tax.table %>% column_to_rownames("tmpID") %>% select(any_of(rownames(tmp.meta)))
-  
-  tmp.msl.comp <- 
-    Maaslin2(input_data = tmp.tax.table, 
-             input_metadata = tmp.meta, 
-             output = "/tmp/",
-             normalization = "TSS",
-             correction = "BH",
-             fixed_effects = c(tmp.var),
-             min_abundance = 0.01,
-             #min_prevalence = 0.5,
-             plot_heatmap = F, 
-             plot_scatter = F); head(tmp.msl.comp)
-  
-  tmp.ls.msl.meta[[j]] <- 
-    merge(tmp.rel.tax.id, tmp.msl.comp$results, by.x = "tmpID", by.y = "feature") %>% 
-    merge(., tmp.prev.table) %>% 
-    mutate(comp = tmp.comp, rank = tmp.level) %>% 
-    select(rank, feature = Species, metadata, coef, stderr, pval, qval, 
-           N, N.not.zero, any_of(unlist(str_split(tmp.comp, pattern = "\\|"))), comp) 
-  
-}; rm(j)
+}; rm(i, j)
 
 # Annotating and Filtering
 
-df.msl.taxa.meta.raw <- 
+tmp.ls.tax.ann <- list()
+
+for (i in seq_along(ranks)) {
+  
+  tmp.rank <- ranks[[i]] 
+  
+  tmp.ls.tax.ann[[i]] <- 
+    tax_table(ps.table) %>% 
+    data.frame(check.names = F) %>% 
+    remove_rownames() %>% 
+    mutate(feature = .[[tmp.rank]]) %>% 
+    select(Kingdom, Phylum, feature) %>% 
+    distinct()
+  
+}; rm(i, tmp.rank)
+
+tmp.tb.tax.ann <- 
+  bind_rows(tmp.ls.tax.ann) %>% 
+  mutate(Phylum2 = case_when(
+    ! Phylum %in% names(colors.tax) & str_detect(Phylum, "Unassigned") ~ "Unassigned",
+    ! Phylum %in% names(colors.tax) & !str_detect(Kingdom, "d: Bacteria") ~ "Other: Domains",
+    ! Phylum %in% names(colors.tax) & str_detect(Kingdom, "d: Bacteria") ~ "Other: Bacteria",
+    Phylum %in% names(colors.tax) ~ Phylum)) %>%
+  filter(Phylum2 != "Unassigned") %>% 
+  mutate(Phylum2 = factor(Phylum2, names(colors.tax)))
+
+df.msl.taxa.meta.raw.2 <- 
   bind_rows(tmp.ls.msl.meta) %>% 
   mutate(comp = factor(comp, levels = unique(comp))) %>% 
+  mutate(rank = factor(rank, levels = ranks)) %>% 
   mutate(metadata = factor(metadata, levels = names(tb.metad)[10:ncol(tb.metad)])) %>% 
-  merge(., tb.aux.ann.ko.def %>% select(ko_class:!!as.symbol(tmp.level)) %>% distinct(), by.x = "feature", by.y = tmp.level, all.x = T) %>% 
-  select(ko_class, feature, metadata, coef:comp) %>%
-  arrange(metadata, -abs(coef), qval)
+  merge(., tmp.tb.tax.ann, "feature", all.x = T) %>% 
+  select(rank, Kingdom:Phylum2, feature, metadata, coef:comp) %>% 
+  arrange(rank, metadata, -abs(coef), qval) %>% 
+  filter(!str_detect(feature, "Un.\\)$"))
 
-df.msl.taxa.meta.filt <- df.msl.taxa.meta.raw %>% filter(qval < 0.1)
+rm(list = ls(pattern = "^tmp."))
 
-df.msl.taxa.meta <- list("Raw" = df.msl.taxa.meta.raw, "Filtered" = df.msl.taxa.meta.filt)
-
-openxlsx::write.xlsx(x = df.msl.taxa.meta, file = paste0(path.tb.dir, "/maaslin_ko_class-meta.xlsx"), rowNames = F)
-
-# Graph
-
-tmp.corr.flatted <-
-  df.msl.taxa.meta.raw %>% 
-  #filter(rank == "Genus") %>% 
-  mutate(sig.f = case_when(
-    qval <= 0.1 ~ "*", 
-    #qval > 0.1 & pval < 0.05 ~ "+",
-    .default = "")
-  ) %>% 
-  mutate(r.tier = case_when(
-    coef >=  1 ~ "[1, Inf)",
-    coef >=  0.50 & coef <  1 ~ "[0.5, 1)",
-    coef >=  0.00 & coef <  0.50 ~ "[0, 0.5)",
-    coef >  -0.50 & coef <  0.00 ~ "(−0.5, 0)",
-    coef >  -1 & coef <= -0.50 ~ "(−1, −0.5]",
-    coef <= -1 ~ "(-Inf, −1]",
-  )) %>% 
-  mutate(r.color = ifelse(abs(coef) >= 1, "white", "black")) %>% 
-  mutate(r.tier = factor(r.tier, c("[1, Inf)", "[0.5, 1)", "[0, 0.5)", "(−0.5, 0)", "(−1, −0.5]", "(-Inf, −1]")))
-
-tmp.taxa.has.sig <- tmp.corr.flatted %>% filter(sig.f != "") %>% pull(feature) %>% unique()
-
-tmp.corr.flatted.filt <- 
-  tmp.corr.flatted %>% 
-  #filter(feature %in% tmp.taxa.has.sig) %>% 
-  rename(metad = metadata) %>% 
-  mutate(feature2 = str_glue("{feature} (B={`Belgian: post-HFD`};Y={`Yanomami: post-HFD`})"))
-
-tmp.gg.msl.1 <- 
-  ggplot(tmp.corr.flatted.filt, aes(x = metad, y = feature2, fill = r.tier)) +
-  geom_tile(colour = "white", size = .25) +
-  geom_text(aes(label = sig.f, color = r.color), size = 2.5, hjust= .5, vjust = .75, , fontface='bold') +
-  facet_grid(ko_class ~ .,  scales = "free", space = "free_y") +
-  scale_color_identity() +
-  scale_fill_manual(values = colors.msl) + 
-  xlab("") + ylab("") +
-  my.theme.1 + 
-  theme(
-    axis.text.x = element_text(size = 6.5, angle = 45, hjust = 1, vjust = 1),
-    strip.text.y = element_blank(),
-    panel.spacing.x = unit(0, "mm"),
-    panel.spacing.y = unit(1, "mm"),
-    plot.margin = unit(c(0, 0, 0, .5), 'cm')
-  ); tmp.gg.msl.1
-
-tmp.gg.msl.2 <-
-  ggplot(tmp.corr.flatted.filt, aes(x = 1, y = feature2, fill = ko_class)) +
-  facet_grid(ko_class ~ .,  scales = "free", space = "free_y") +
-  geom_tile(colour = "white", size = .25) +
-  scale_fill_manual(name = "", values = colors.ko) +
-  scale_color_identity(name = "") +
-  xlab("") + ylab("") +
-  my.theme.1 +
-  theme(panel.border = element_rect(colour = "#00000000", fill = NA),
-        panel.spacing.x = unit(0, "mm"),
-        panel.spacing.y = unit(1, "mm"),
-        strip.text.y = element_blank(),
-        axis.line.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line.x = element_line(color = "#00000000"),
-        axis.text.x = element_text(colour = '#00000000'),
-        axis.ticks.x = element_line(color = "#00000000"),
-        plot.margin = unit(c(0, .5, 0, -.5), 'cm'))
-
-print(tmp.gg.msl.1 + plot_spacer() + tmp.gg.msl.2 + (gg.leg.msl/gg.leg.ko) + plot_layout(nrow = 1, widths = c(.75, -.095, .04, 1.25)))
-
-png(filename = paste0(path.fg.dir, "/maaslin_ko_class-meta.png"), width = 5000 * 2.25, height = 170 * (length(unique(tmp.corr.flatted.filt$feature)) + 7), units = "px", res = 1200, type = "cairo")
-
-print(tmp.gg.msl.1 + plot_spacer() + tmp.gg.msl.2 + (gg.leg.msl/gg.leg.ko) + plot_layout(nrow = 1, widths = c(.75, -.095, .04, 1.25)))
-
-dev.off()
-
-rm(list = ls(pattern = "[.]?tmp[.]?"))
-
-
-### KO subclass ----------------------------------------------------------------
-
-
-# PSfying
-
-tmp.level <- "ko_pathway"
-
-tmp.ko.glom.counts <-
-  tb.work.fun.ko %>%
-  filter(ko_class == "Metabolism") %>% 
-  select(ortholog_id, !!as.symbol(tmp.level), tb.metad$sample_id) %>%
-  distinct() %>%
-  group_by(!!as.symbol(tmp.level)) %>%
-  summarise(across(.cols = tb.metad$sample_id, ~ sum(.x, na.rm = TRUE)), .groups = "drop") %>%
-  arrange(!!as.symbol(tmp.level)) %>%
-  data.frame(check.names = F)
-
-tmp.tb.metad <- tb.metad %>% rename(ID = sample_id)
-tmp.tb.count <- tmp.ko.glom.counts %>% select(ID = !!as.symbol(tmp.level), tmp.tb.metad$ID)
-
-tmp.tb.taxon <-
-  tmp.ko.glom.counts %>%
-  mutate(Kingdom = !!as.symbol(tmp.level),
-         Phylum = !!as.symbol(tmp.level),
-         Class = !!as.symbol(tmp.level),
-         Order = !!as.symbol(tmp.level),
-         Family = !!as.symbol(tmp.level),
-         Genus = !!as.symbol(tmp.level),
-         Species = !!as.symbol(tmp.level)) %>%
-  select(ID = !!as.symbol(tmp.level), Kingdom:Species)
-
-row.names(tmp.tb.count) <- tmp.tb.count$ID
-row.names(tmp.tb.taxon) <- tmp.tb.taxon$ID
-row.names(tmp.tb.metad) <- tmp.tb.metad$ID
-
-tmp.tb.count <- tmp.tb.count %>% select(-ID)
-tmp.tb.taxon <- tmp.tb.taxon %>% select(-ID)
-
-tmp.tb.count <- as.matrix(tmp.tb.count)
-tmp.tb.taxon <- as.matrix(tmp.tb.taxon)
-
-tmp.tb.count <- otu_table(tmp.tb.count, taxa_are_rows = TRUE)
-tmp.tb.taxon <- tax_table(tmp.tb.taxon)
-tmp.tb.metad <- sample_data(tmp.tb.metad)
-
-ps.table.ko.glom <- phyloseq(tmp.tb.count, tmp.tb.taxon, tmp.tb.metad)
-
-# MaAsLin2
+### w/o Et as random eff; per group --------------------------------------------
 
 tmp.comps <- c("Belgian: post-HFD|Yanomami: post-HFD")
 
 tmp.ls.msl.meta <- list()
 
-tmp.meta.var <- names(tb.metad)[10:ncol(tb.metad)]
-
-for (j in seq_along(tmp.meta.var)) {
+for (i in seq_along(ranks)) {
   
-  tmp.var <- tmp.meta.var[[j]]
+  tmp.rank <- ranks[[i]]
   
-  tmp.comp.factor <- "donor_ethnicity_timepoint" 
-  tmp.comp <- tmp.comps[[1]]
+  tmp.meta.var <- names(tb.metad)[10:ncol(tb.metad)]
   
-  tmp.meta <- 
-    tb.metad %>% 
-    filter(!!as.symbol(tmp.comp.factor) %in% unlist(str_split(tmp.comp, "\\|"))) %>% 
-    column_to_rownames("sample_id") %>% 
-    select(any_of(c(tmp.comp.factor, tmp.var)))
+  for (tmp.var in tmp.meta.var) {
+    
+    for (tmp.et in levels(tb.metad$donor_ethnicity)) {
+      
+      tmp.comp.factor <- "donor_ethnicity_timepoint" 
+      tmp.comp.random <- "donor_ethnicity" 
+      tmp.comp <- tmp.comps[[1]]
+      
+      tmp.meta <- 
+        tb.metad %>% 
+        filter(!!as.symbol(tmp.comp.factor) %in% unlist(str_split(tmp.comp, "\\|"))) %>% 
+        column_to_rownames("sample_id") %>% 
+        select(any_of(c(tmp.comp.factor, tmp.comp.random, tmp.var))) %>% 
+        filter(donor_ethnicity == tmp.et)
+      
+      tmp.tax.table <- 
+        ls.glom.ps.filt[[tmp.rank]] %>% 
+        subset_samples(., timepoint == "post-HFD" & donor_ethnicity == tmp.et) %>% 
+        prune_taxa(taxa_sums(.) > 0, .) %>% 
+        microbiome::transform(., "total")
+      
+      tmp.tax.table <- 
+        merge(
+          tax_table(tmp.tax.table), 
+          otu_table(tmp.tax.table), 
+          by = "row.names", all = T)[-1] %>% 
+        select(Kingdom:!!as.symbol(tmp.rank), 8:ncol(.)) %>% 
+        mutate(tmpID = paste0("tmpID.", 1:n()))
+      
+      tmp.prev.table <- 
+        tmp.tax.table %>% 
+        select(tmpID, any_of(rownames(tmp.meta))) %>% 
+        pivot_longer(cols = -tmpID, names_to = "tmp", values_to = "prev") %>% 
+        mutate(prev = ifelse(prev > 0, 1, 0)) %>% 
+        merge(tmp.meta, ., by.x = 0, by.y = "tmp") %>% 
+        group_by(tmpID, !!as.symbol(tmp.comp.factor)) %>% 
+        summarize(prev = sum(prev, na.rm = T)) %>% 
+        pivot_wider(names_from = tmp.comp.factor, values_from = "prev") %>% 
+        data.frame(check.names = F)
+      
+      tmp.rel.tax.id <- tmp.tax.table %>% select(tmpID, any_of(ranks[[i]]))
+      tmp.tax.table <- tmp.tax.table %>% column_to_rownames("tmpID") %>% select(any_of(rownames(tmp.meta)))
+      
+      tmp.msl.comp <- 
+        Maaslin2(input_data = tmp.tax.table, 
+                 input_metadata = tmp.meta, 
+                 output = "/tmp/",
+                 normalization = "TSS",
+                 correction = "BH",
+                 fixed_effects = c(tmp.var),
+                 min_abundance = 0.01,
+                 #min_prevalence = 0.4,
+                 plot_heatmap = F, 
+                 plot_scatter = F); head(tmp.msl.comp)
+      
+      tmp.ls.msl.meta[[tmp.var]][[tmp.et]] <- 
+        merge(tmp.rel.tax.id, tmp.msl.comp$results, by.x = "tmpID", by.y = "feature") %>% 
+        merge(., tmp.prev.table) %>% 
+        mutate(comp = tmp.comp, rank = ranks[[i]], donor_ethnicity = tmp.et) %>% 
+        select(rank, feature = ranks[[i]], metadata, coef, stderr, pval, qval, 
+               N, N.not.zero, any_of(unlist(str_split(tmp.comp, pattern = "\\|"))), 
+               comp, donor_ethnicity)
+      
+    }
+    
+  }
   
-  tmp.tax.table <- 
-    ps.table.ko.glom %>% 
-    subset_samples(., timepoint == "post-HFD") %>% 
-    prune_taxa(taxa_sums(.) > 0, .) %>% 
-    microbiome::transform(., "total")
-  
-  tmp.tax.table <- 
-    merge(
-      tax_table(tmp.tax.table), 
-      otu_table(tmp.tax.table), 
-      by = "row.names", all = T)[-1] %>% 
-    select(Species, 8:ncol(.)) %>% 
-    mutate(tmpID = paste0("tmpID.", 1:n()))
-  
-  tmp.prev.table <- 
-    tmp.tax.table %>% 
-    select(tmpID, any_of(rownames(tmp.meta))) %>% 
-    pivot_longer(cols = -tmpID, names_to = "tmp", values_to = "prev") %>% 
-    mutate(prev = ifelse(prev > 0, 1, 0)) %>% 
-    merge(tmp.meta, ., by.x = 0, by.y = "tmp") %>% 
-    group_by(tmpID, !!as.symbol(tmp.comp.factor)) %>% 
-    summarize(prev = sum(prev, na.rm = T)) %>% 
-    pivot_wider(names_from = tmp.comp.factor, values_from = "prev") %>% 
-    data.frame(check.names = F)
-  
-  tmp.rel.tax.id <- tmp.tax.table %>% select(tmpID, Species)
-  tmp.tax.table <- tmp.tax.table %>% column_to_rownames("tmpID") %>% select(any_of(rownames(tmp.meta)))
-  
-  tmp.msl.comp <- 
-    Maaslin2(input_data = tmp.tax.table, 
-             input_metadata = tmp.meta, 
-             output = "/tmp/",
-             normalization = "TSS",
-             correction = "BH",
-             fixed_effects = c(tmp.var),
-             min_abundance = 0.01,
-             #min_prevalence = 0.5,
-             plot_heatmap = F, 
-             plot_scatter = F); head(tmp.msl.comp)
-  
-  tmp.ls.msl.meta[[j]] <- 
-    merge(tmp.rel.tax.id, tmp.msl.comp$results, by.x = "tmpID", by.y = "feature") %>% 
-    merge(., tmp.prev.table) %>% 
-    mutate(comp = tmp.comp, rank = tmp.level) %>% 
-    select(rank, feature = Species, metadata, coef, stderr, pval, qval, 
-           N, N.not.zero, any_of(unlist(str_split(tmp.comp, pattern = "\\|"))), comp) 
-  
-}; rm(j)
+}; rm(i, tmp.var, tmp.et)
 
 # Annotating and Filtering
 
-df.msl.taxa.meta.raw <- 
-  bind_rows(tmp.ls.msl.meta) %>% 
+tmp.ls.tax.ann <- list()
+
+for (i in seq_along(ranks)) {
+  
+  tmp.rank <- ranks[[i]] 
+  
+  tmp.ls.tax.ann[[i]] <- 
+    tax_table(ps.table) %>% 
+    data.frame(check.names = F) %>% 
+    remove_rownames() %>% 
+    mutate(feature = .[[tmp.rank]]) %>% 
+    select(Kingdom, Phylum, feature) %>% 
+    distinct()
+  
+}; rm(i, tmp.rank)
+
+tmp.tb.tax.ann <- 
+  bind_rows(tmp.ls.tax.ann) %>% 
+  mutate(Phylum2 = case_when(
+    ! Phylum %in% names(colors.tax) & str_detect(Phylum, "Unassigned") ~ "Unassigned",
+    ! Phylum %in% names(colors.tax) & !str_detect(Kingdom, "d: Bacteria") ~ "Other: Domains",
+    ! Phylum %in% names(colors.tax) & str_detect(Kingdom, "d: Bacteria") ~ "Other: Bacteria",
+    Phylum %in% names(colors.tax) ~ Phylum)) %>%
+  filter(Phylum2 != "Unassigned") %>% 
+  mutate(Phylum2 = factor(Phylum2, names(colors.tax)))
+
+df.msl.taxa.meta.raw.3 <- 
+  bind_rows(lapply(tmp.ls.msl.meta, bind_rows)) %>% 
+  mutate(donor_ethnicity = factor(donor_ethnicity, levels = unique(donor_ethnicity))) %>% 
   mutate(comp = factor(comp, levels = unique(comp))) %>% 
+  mutate(rank = factor(rank, levels = ranks)) %>% 
   mutate(metadata = factor(metadata, levels = names(tb.metad)[10:ncol(tb.metad)])) %>% 
-  merge(., tb.aux.ann.ko.def %>% select(ko_class:!!as.symbol(tmp.level)) %>% distinct(), by.x = "feature", by.y = tmp.level, all.x = T) %>% 
-  select(ko_class:ncol(.), feature, metadata, coef:comp) %>%
-  arrange(metadata, -abs(coef), qval)
+  merge(., tmp.tb.tax.ann, "feature", all.x = T) %>% 
+  select(rank, Kingdom:Phylum2, feature, metadata, coef:N.not.zero, ends_with("post-HFD"), comp, donor_ethnicity) %>% 
+  arrange(rank, metadata, -abs(coef), qval) %>% 
+  filter(!str_detect(feature, "Un.\\)$"))
 
-df.msl.taxa.meta.filt <- df.msl.taxa.meta.raw %>% filter(qval < 0.1)
+rm(list = ls(pattern = "^tmp."))
 
-df.msl.taxa.meta <- list("Raw" = df.msl.taxa.meta.raw, "Filtered" = df.msl.taxa.meta.filt)
+### Graphs ------------------------------------------------------------------
 
-openxlsx::write.xlsx(x = df.msl.taxa.meta, file = paste0(path.tb.dir, "/maaslin_ko_met-meta.xlsx"), rowNames = F)
+df.msl.taxa.meta.raw.1 # original
+df.msl.taxa.meta.raw.2 # w/ group as random
+df.msl.taxa.meta.raw.3 # per group
 
-# Graph
+fun.get.taxa.meta.msl <- function(df.msl.taxa.meta.raw) {
+  
+  tmp.df.msl.taxa.meta.raw <- df.msl.taxa.meta.raw
+  
+  if (!"donor_ethnicity" %in% names(tmp.df.msl.taxa.meta.raw)) {
+    
+    tmp.df.msl.taxa.meta.raw <- tmp.df.msl.taxa.meta.raw %>% mutate(donor_ethnicity = "")
+    
+    
+  }
+  
+  tmp.corr.flatted <-
+    tmp.df.msl.taxa.meta.raw %>% 
+    filter(rank == "Genus") %>% 
+    mutate(sig.f = case_when(
+      qval <= 0.05 ~ "*", 
+      qval <= 0.1  ~ "~", 
+      .default = "")
+    ) %>% 
+    mutate(r.tier = case_when(
+      coef >=  1 ~ "[1, Inf)",
+      coef >=  0.50 & coef <  1 ~ "[0.5, 1)",
+      coef >=  0.00 & coef <  0.50 ~ "[0, 0.5)",
+      coef >  -0.50 & coef <  0.00 ~ "(−0.5, 0)",
+      coef >  -1 & coef <= -0.50 ~ "(−1, −0.5]",
+      coef <= -1 ~ "(-Inf, −1]",
+    )) %>% 
+    mutate(r.color = ifelse(abs(coef) >= 1, "white", "black")) %>% 
+    mutate(r.tier = factor(r.tier, c("[1, Inf)", "[0.5, 1)", "[0, 0.5)", "(−0.5, 0)", "(−1, −0.5]", "(-Inf, −1]"))) %>% 
+    arrange(donor_ethnicity) %>% 
+    group_by(metadata) %>% 
+    mutate(feature2 = make.unique(feature, sep = "###")) %>% 
+    ungroup() %>% 
+    data.frame(check.names = F)
+  
+  tmp.corr.flatted <- 
+    merge(tmp.corr.flatted, df.msl.taxa.raw %>% select(comp, feature, enrich_group), all.x = T) %>% 
+    select(rank, Kingdom, Phylum, Phylum2, feature, feature2, metadata, everything()) %>% 
+    mutate(enrich_shape = ifelse(is.na(enrich_group), 21, 24) %>% as.numeric) %>% 
+    mutate(enrich_group = 
+             ifelse(is.na(enrich_group), "Not Sig.", as.character(enrich_group)) %>% 
+             factor(., levels = c(names(colors.gp.tp), "Not Sig.")))
+  
+  
+  tmp.taxa.has.sig <- tmp.corr.flatted %>% filter(sig.f != "") %>% pull(feature2) %>% unique()
+  tmp.taxa.has.sig
+  
+  tmp.corr.flatted.filt <- 
+    tmp.corr.flatted %>% 
+    filter(feature2 %in% tmp.taxa.has.sig)
+  
+  tmp.corr.flatted.filt.mt <- 
+    tmp.corr.flatted.filt %>% 
+    select(feature2, metadata, coef) %>% 
+    pivot_wider(names_from = "metadata", values_from = "coef") %>% 
+    data.frame(check.names = F) %>% 
+    column_to_rownames("feature2") %>% 
+    as.matrix()
+  
+  tmp.corr.flatted.filt.hc <- 
+    hclust(dist(tmp.corr.flatted.filt.mt, method = "euclidean"), method = "complete")
+  
+  #Plot the dendrogram 
+  #plot(tmp.corr.flatted.filt.hc, xlab = "Data Points")
+  
+  tmp.corr.flatted.filt.label.order <- tmp.corr.flatted.filt.hc$labels[tmp.corr.flatted.filt.hc$order]
+  
+  tmp.corr.flatted.filt %>% 
+    mutate(feature2 = str_remove(feature2, "^.*: ")) %>% 
+    mutate(feature2 = factor(feature2, levels = str_remove(tmp.corr.flatted.filt.label.order, "^.*: "))) -> tmp.corr.flatted.filt.2
+  
+  tmp.gg.msl.1 <- 
+    ggplot(tmp.corr.flatted.filt.2, aes(x = 1, y = feature2, fill = Phylum2)) +
+    facet_grid(donor_ethnicity ~ ., scales = "free", space = "free", switch = "y") +
+    geom_tile(aes(width = 0.9, height = 0.9), color = "white", size = .35) +
+    scale_y_discrete(expand = expansion(mult = c(0.01, 0.01)), labels = function(x) str_remove(x, "###.*$")) +
+    scale_x_continuous(expand = expansion(mult = c(0, 0))) +
+    scale_fill_manual(name = "", values = colors.tax) +
+    xlab("") + ylab("") +
+    my.theme.2 + 
+    theme(panel.border = element_rect(colour = "#00000000", fill = NA),
+          strip.placement = "outside",
+          strip.text.y.left = element_markdown(size = 10, colour = 'black'),
+          
+          axis.line.y = element_line(color = "#00000000"),
+          axis.line.x = element_line(color = "#00000000"),
+          
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          
+          panel.spacing = unit(.5, "cm"),
+          plot.margin = unit(c(.5, .25, .5, 0), 'cm')); tmp.gg.msl.1
+  
+  tmp.gg.msl.2 <- 
+    ggplot(tmp.corr.flatted.filt.2, aes(x = metadata, y = feature2, fill = r.tier)) +
+    facet_grid(donor_ethnicity ~ ., scales = "free", space = "free") +
+    geom_tile(aes(width = 0.9, height = 0.9), colour = "white", size = .25) +
+    geom_text(aes(label = sig.f, color = r.color), size = 2.5, hjust= .5, vjust = .75, , fontface='bold') +
+    scale_y_discrete(expand = expansion(mult = c(0.01, 0.01)), labels = function(x) str_remove(x, "###.*$")) +
+    scale_x_discrete(expand = expansion(mult = c(0, 0))) +
+    scale_color_identity() +
+    scale_fill_manual(values = colors.msl) + 
+    xlab("") + ylab("") +
+    coord_cartesian(clip = "off") +
+    my.theme.1 + 
+    theme(
+      axis.line.y = element_line(color = "#00000000"),
+      
+      axis.text.y = element_blank(),
+      axis.title.y = element_blank(),
+      axis.ticks.y = element_blank(),
+      strip.text.y = element_blank(),
+      
+      axis.text.x = element_text(size = 8, angle = 45, hjust = 1, vjust = 1),
+      panel.spacing = unit(.5, "cm"),
+      plot.margin = unit(c(.5, 0, .5, 0), 'cm')); tmp.gg.msl.2
+  
+  tmp.gg.msl.3 <-
+    ggplot(tmp.corr.flatted.filt.2, aes(x = 1, y = feature2, fill = enrich_group)) +
+    facet_grid(donor_ethnicity ~ ., scales = "free", space = "free") +
+    geom_tile(aes(width = 0, height = 0.9), color = "#00000000", fill = "#00000000", size = .35) +
+    geom_point(aes(shape = enrich_shape), size = 2.25, alpha = 1, color = "white") + 
+    scale_shape_identity() +
+    scale_y_discrete(expand = expansion(mult = c(0.01, 0.01)), labels = function(x) str_remove(x, "###.*$")) +
+    scale_x_continuous(expand = expansion(mult = c(0.001, 0.001))) +
+    scale_fill_manual(values = c(colors.gp.tp, "Not Sig." = "gray75")) +  
+    my.theme.1 +
+    theme(
+      axis.line.y = element_line(color = "#00000000"),
+      axis.line.x = element_line(color = "#00000000"),
+      
+      axis.text.y = element_blank(),
+      axis.title.y = element_blank(),
+      axis.ticks.y = element_blank(),
+      strip.text.y = element_blank(),
+      
+      axis.text.x = element_blank(),
+      axis.title.x = element_blank(),
+      axis.ticks.x = element_blank(),
+      
+      panel.spacing = unit(.5, "cm"),
+      plot.margin = unit(c(.5, 0, .5, 0), 'cm')); tmp.gg.msl.3
+  
+  tmp.gg.msl <- tmp.gg.msl.1 + tmp.gg.msl.2 + tmp.gg.msl.3 + plot_layout(nrow = 1, widths = c(.025, .99, .075))
+  
+  return(tmp.gg.msl)
+  
+}
 
-tmp.corr.flatted <-
-  df.msl.taxa.meta.raw %>% 
-  #filter(rank == "Genus") %>% 
-  mutate(sig.f = case_when(
-    qval <= 0.1 ~ "*", 
-    #qval > 0.1 & pval < 0.05 ~ "+",
-    .default = "")
-  ) %>% 
-  mutate(r.tier = case_when(
-    coef >=  1 ~ "[1, Inf)",
-    coef >=  0.50 & coef <  1 ~ "[0.5, 1)",
-    coef >=  0.00 & coef <  0.50 ~ "[0, 0.5)",
-    coef >  -0.50 & coef <  0.00 ~ "(−0.5, 0)",
-    coef >  -1 & coef <= -0.50 ~ "(−1, −0.5]",
-    coef <= -1 ~ "(-Inf, −1]",
-  )) %>% 
-  mutate(r.color = ifelse(abs(coef) >= 1, "white", "black")) %>% 
-  mutate(r.tier = factor(r.tier, c("[1, Inf)", "[0.5, 1)", "[0, 0.5)", "(−0.5, 0)", "(−1, −0.5]", "(-Inf, −1]")))
+ls.gg.taxa.meta.msl <- 
+  list(fun.get.taxa.meta.msl(df.msl.taxa.meta.raw.1),
+       fun.get.taxa.meta.msl(df.msl.taxa.meta.raw.2),
+       fun.get.taxa.meta.msl(df.msl.taxa.meta.raw.3))
 
-tmp.taxa.has.sig <- tmp.corr.flatted %>% filter(sig.f != "") %>% pull(feature) %>% unique()
+ls.gg.taxa.meta.msl
 
-tmp.corr.flatted.filt <- 
-  tmp.corr.flatted %>% 
-  #filter(feature %in% tmp.taxa.has.sig) %>% 
-  rename(metad = metadata) %>% 
-  mutate(feature2 = str_glue("{feature} (B={`Belgian: post-HFD`};Y={`Yanomami: post-HFD`})"))
+print(wrap_plots(unlist(ls.gg.taxa.meta.msl)) + plot_layout(ncol = 1, heights = c(19, 3, 14)))
 
-tmp.gg.msl.1 <- 
-  ggplot(tmp.corr.flatted.filt, aes(x = metad, y = feature2, fill = r.tier)) +
-  geom_tile(colour = "white", size = .25) +
-  geom_text(aes(label = sig.f, color = r.color), size = 2.5, hjust= .5, vjust = .75, , fontface='bold') +
-  facet_grid(ko_subclass ~ .,  scales = "free", space = "free_y") +
-  scale_color_identity() +
-  scale_fill_manual(values = colors.msl) + 
-  xlab("") + ylab("") +
-  my.theme.1 + 
-  theme(
-    axis.text.x = element_text(size = 6.5, angle = 45, hjust = 1, vjust = 1),
-    strip.text.y = element_blank(),
-    panel.spacing.x = unit(0, "mm"),
-    panel.spacing.y = unit(1, "mm"),
-    plot.margin = unit(c(0, 0, 0, .5), 'cm')
-  ); tmp.gg.msl.1
+{png(filename = paste0(path.fg.dir, "/maaslin_taxa-meta-ord.png"), width = 5000 * 1.25, height = 5000 * 2.5, units = "px", res = 1200, type = "cairo")
 
-tmp.gg.msl.2 <-
-  ggplot(tmp.corr.flatted.filt, aes(x = 1, y = feature2, fill = ko_subclass)) +
-  facet_grid(ko_subclass ~ .,  scales = "free", space = "free_y") +
-  geom_tile(colour = "white", size = .25) +
-  scale_fill_manual(name = "", values = colors.ko.met) +
-  scale_color_identity(name = "") +
-  xlab("") + ylab("") +
-  my.theme.1 +
-  theme(panel.border = element_rect(colour = "#00000000", fill = NA),
-        panel.spacing.x = unit(0, "mm"),
-        panel.spacing.y = unit(1, "mm"),
-        strip.text.y = element_blank(),
-        axis.line.y = element_blank(),
-        axis.text.y = element_blank(),
-        axis.ticks.y = element_blank(),
-        axis.line.x = element_line(color = "#00000000"),
-        axis.text.x = element_text(colour = '#00000000'),
-        axis.ticks.x = element_line(color = "#00000000"),
-        plot.margin = unit(c(0, .5, 0, -.5), 'cm'))
+print(wrap_plots(unlist(ls.gg.taxa.meta.msl)) + plot_layout(ncol = 1, heights = c(19, 3, 14)))
 
+dev.off()}
 
-print(tmp.gg.msl.1 + plot_spacer() + tmp.gg.msl.2 + (gg.leg.msl/gg.leg.ko.met) + plot_layout(nrow = 1, widths = c(.75, -.1, .04, 1.25)))
+df.msl.taxa.meta.filt.1 <- df.msl.taxa.meta.raw.1 %>% filter(qval <= 0.1)
+df.msl.taxa.meta.filt.2 <- df.msl.taxa.meta.raw.2 %>% filter(qval <= 0.1)
+df.msl.taxa.meta.filt.3 <- df.msl.taxa.meta.raw.3 %>% filter(qval <= 0.1)
 
-png(filename = paste0(path.fg.dir, "/maaslin_ko_met-meta.png"), width = 5000 * 2.3, height = 170 * (length(unique(tmp.corr.flatted.filt$feature)) + 7), units = "px", res = 1200, type = "cairo")
+df.msl.taxa.meta.1 <- list("Raw" = df.msl.taxa.meta.raw.1, "Filtered" = df.msl.taxa.meta.filt.1)
+df.msl.taxa.meta.2 <- list("Raw" = df.msl.taxa.meta.raw.2, "Filtered" = df.msl.taxa.meta.filt.2)
+df.msl.taxa.meta.3 <- list("Raw" = df.msl.taxa.meta.raw.3, "Filtered" = df.msl.taxa.meta.filt.3)
 
-print(tmp.gg.msl.1 + plot_spacer() + tmp.gg.msl.2 + (gg.leg.msl/gg.leg.ko.met) + plot_layout(nrow = 1, widths = c(.75, -.1, .04, 1.25)))
-
-dev.off()
-
-rm(list = ls(pattern = "[.]?tmp[.]?"))
+openxlsx::write.xlsx(x = df.msl.taxa.meta.1, file = paste0(path.tb.dir, "/maaslin_taxa-meta1.xlsx"), rowNames = F)
+openxlsx::write.xlsx(x = df.msl.taxa.meta.2, file = paste0(path.tb.dir, "/maaslin_taxa-meta2.xlsx"), rowNames = F)
+openxlsx::write.xlsx(x = df.msl.taxa.meta.3, file = paste0(path.tb.dir, "/maaslin_taxa-meta3.xlsx"), rowNames = F)
 
 
 # End ---------------------------------------------------------------------

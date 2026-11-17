@@ -32,7 +32,7 @@ library("Maaslin2")
 library("tidyverse")
 
 getwd()
-setwd("~/YanomamiMouseHFD/")
+setwd("~/Mouse-HFD-WMS/")
 getwd()
 
 list.dirs()
@@ -46,7 +46,7 @@ for (i in c(path.wk.dir)) {
   
 }; rm(i)
 
-my.exp <- "HFD1"
+my.exp <- "HFD2"
 
 path.fg.dir <- paste0(path.wk.dir, "/", my.exp ,"/figures")
 path.tb.dir <- paste0(path.wk.dir, "/", my.exp,  "/tables")
@@ -633,25 +633,26 @@ my.theme.1 <-
         legend.title = element_blank(),
         legend.justification = c(0.5, 0.5),
         
-        strip.text = element_text(size = 10, colour = 'black', face = "bold"),
+        strip.text = element_text(size = 10, colour = 'black'),
         strip.background = element_rect(fill = NA, colour = NA),
+        strip.clip = "off",
         
         panel.background = element_rect(fill = "white"),
         panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
-        panel.border = element_rect(color = "black", linewidth = 0, fill = NA),
+        panel.border = element_blank(),
+        panel.spacing = unit(.1, "lines"),
         
         axis.ticks = element_line(color = "black", linewidth = .25),
-        axis.ticks.length = unit(1, "pt"),
+        axis.ticks.length = unit(2.5, "pt"),
         
         axis.line.x = element_line(colour = 'black', linewidth = 0.25),
         axis.line.y = element_line(colour = 'black', linewidth = 0.25),
         axis.title.x = element_text(size = 10, colour = 'black'),
         axis.title.y = element_text(size = 10, colour = 'black'),
         axis.title.y.right = element_text(size = 10, colour = 'black'),
-        axis.text.x = element_text(size = 7, colour = 'black'),
-        axis.text.y = element_text(size = 7, colour = 'black'),
-        
+        axis.text.x = element_text(size = 8, colour = 'black'),
+        axis.text.y = element_text(size = 8, colour = 'black'),
         plot.title = element_text(size = 10, face = 'bold', colour = 'black'),
         plot.subtitle = element_text(size = 6, colour = 'black'),
         plot.margin = unit(c(0.5, 0.75, 0.5, 0.75), 'cm'))
@@ -663,24 +664,26 @@ my.theme.2 <-
         legend.title = element_blank(),
         legend.justification = c(0.5, 0.5),
         
-        strip.text = element_markdown(size = 10, colour = 'black', face = "bold"),
+        strip.text = element_markdown(size = 10, colour = 'black'),
         strip.background = element_rect(fill = NA, colour = NA),
+        strip.clip = "off",
         
         panel.background = element_rect(fill = "white"),
         panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
-        panel.border = element_rect(color = "black", linewidth = 0, fill = NA),
+        panel.border = element_blank(),
+        panel.spacing = unit(.1, "lines"),
         
         axis.ticks = element_line(color = "black", linewidth = .25),
-        axis.ticks.length = unit(1, "pt"),
+        axis.ticks.length = unit(2.5, "pt"),
         
         axis.line.x = element_line(colour = 'black', linewidth = 0.25),
         axis.line.y = element_line(colour = 'black', linewidth = 0.25),
         axis.title.x = element_markdown(size = 10, colour = 'black'),
         axis.title.y = element_markdown(size = 10, colour = 'black'),
         axis.title.y.right = element_markdown(size = 10, colour = 'black'),
-        axis.text.x = element_markdown(size = 7, colour = 'black'),
-        axis.text.y = element_markdown(size = 7, colour = 'black'),
+        axis.text.x = element_markdown(size = 8, colour = 'black'),
+        axis.text.y = element_markdown(size = 8, colour = 'black'),
         
         plot.title = element_markdown(size = 10, face = 'bold', colour = 'black'),
         plot.subtitle = element_markdown(size = 6, colour = 'black'),
@@ -768,22 +771,22 @@ concordance <-
   concordance %>% 
   mutate(regulation = 
            case_when(
-             in_g1 & !in_both & concordance$coef_g1 < 0 ~ "Belgian only (pre-HFD higher)",
-             in_g1 & !in_both & concordance$coef_g1 > 0 ~ "Belgian only (post-HFD higher)",
-             in_g2 & !in_both & concordance$coef_g2 < 0 ~ "Yanomami only (pre-HFD higher)",
-             in_g2 & !in_both & concordance$coef_g2 > 0 ~ "Yanomami only (post-HFD higher)",
-             in_both & sign(coef_g1) == sign(coef_g2) & concordance$coef_g1 > 0 ~ "Concordant (post-HFD higher)",
-             in_both & sign(coef_g1) == sign(coef_g2) & concordance$coef_g1 < 0 ~ "Concordant (pre-HFD higher)",
+             in_g1 & !in_both & concordance$coef_g1 < 0 ~ "Belgian only, pre-HFD higher",
+             in_g1 & !in_both & concordance$coef_g1 > 0 ~ "Belgian only, post-HFD higher",
+             in_g2 & !in_both & concordance$coef_g2 < 0 ~ "Yanomami only, pre-HFD higher",
+             in_g2 & !in_both & concordance$coef_g2 > 0 ~ "Yanomami only, post-HFD higher",
+             in_both & sign(coef_g1) == sign(coef_g2) & concordance$coef_g1 > 0 ~ "Concordant, post-HFD higher",
+             in_both & sign(coef_g1) == sign(coef_g2) & concordance$coef_g1 < 0 ~ "Concordant, pre-HFD higher",
              in_both & sign(coef_g1) != sign(coef_g2) ~ "Discordant",
              .default = "NS"
            )) %>% 
-  mutate(regulation = factor(regulation, c("Concordant (post-HFD higher)", 
-                                           "Concordant (pre-HFD higher)",
+  mutate(regulation = factor(regulation, c("Concordant, post-HFD higher", 
+                                           "Concordant, pre-HFD higher",
                                            "Discordant",
-                                           "Belgian only (pre-HFD higher)",
-                                           "Belgian only (post-HFD higher)",
-                                           "Yanomami only (pre-HFD higher)",
-                                           "Yanomami only (post-HFD higher)",
+                                           "Belgian only, pre-HFD higher",
+                                           "Belgian only, post-HFD higher",
+                                           "Yanomami only, pre-HFD higher",
+                                           "Yanomami only, post-HFD higher",
                                            "NS")))
 
 table(concordance$regulation)
@@ -798,6 +801,7 @@ concordant_genes <-
   mutate(mean_coef = mean(abs(coef_g1) + abs(coef_g2)) / 2) %>% ungroup() %>% 
   arrange(-mean_coef) %>%
   mutate(top = 1:n()) %>% 
+  mutate(feature = str_remove(feature, "^.*: ")) %>% 
   mutate(my.label = ifelse(top < 30, feature, NA_character_)) %>% 
   mutate(my.nudge.x = case_when( !is.na(my.label) & coef_g1 > 0 & coef_g2 > 0 ~ Inf,
                                  !is.na(my.label) & coef_g1 < 0 & coef_g2 < 0 ~ -Inf,
@@ -819,21 +823,17 @@ names(tmp.colors) <- levels(concordance$regulation)
 
 gg.did <-
   ggplot(concordance, aes(x = coef_g1, y = coef_g2, fill = regulation)) +
-  
+
   geom_text_repel(data = concordant_genes, 
-                  aes(label = my.label, nudge_x = my.nudge.x, nudge_y = my.nudge.y, color = regulation),
-                  direction = "y", size = 2.25, segment.alpha = .15, segment.color = 'black',
-                  min.segment.length = 0.2, max.overlaps = 999, force = 30, force_pull = 0.5, seed = 123, show.legend = F) +
-  
-  geom_vline(xintercept = 0, linewidth = 0.25, linetype = "dotted") +
-  geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
+                  aes(label = my.label, nudge_x = my.nudge.x, color = regulation),
+                  direction = "y", size = 2.25, segment.alpha = .5, segment.color = 'black', segment.size = 0.25,
+                  min.segment.length = 0.2, max.overlaps = 999, force = 20, force_pull = 0.5, seed = 123) +
   
   geom_point(data = . %>% filter(regulation == "NS"), shape = 21, color = "white", size = 2) +
   geom_point(data = . %>% filter(regulation != "NS"), shape = 21, color = "white", size = 2.5) +
   
-  #geom_vline(xintercept = c(-1, 1), linetype = "dotted", color = "grey70") +
-  #geom_hline(yintercept = c(-1, 1), linetype = "dotted", color = "grey70") +
-  #geom_abline(slope = 1, intercept = 0, linetype = "solid", color = "grey40", linewidth = 0.4) +
+  geom_vline(xintercept = 0, linewidth = 0.25, linetype = "dotted") +
+  geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
   
   scale_x_continuous(limits = ~ c(-1.1, 1.1) * max(abs(.x))) +
   scale_y_continuous(limits = ~ c(-1.1, 1.1) * max(abs(.x))) +
@@ -868,7 +868,7 @@ gg.leg.tmp <- ggpubr::as_ggplot(ggpubr::get_legend(gg.leg.tmp)); gg.leg.tmp
 gg.did + gg.leg.tmp + plot_layout(ncol = 2, widths = c(.35, .65)) -> gg.did.leg; gg.did.leg
 
 {
-  png(filename = paste0(path.fg.dir, "/DiD_genus.png"), width = 5000 * 3, height = 5000 * .85, units = "px", res = 1200, type = "cairo")
+  png(filename = paste0(path.fg.dir, "/DiD_genus.png"), width = 5000 * 2.5, height = 5000 * .85, units = "px", res = 1200, type = "cairo")
   
   print((gg.did.leg))
   

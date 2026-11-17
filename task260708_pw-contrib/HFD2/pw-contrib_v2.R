@@ -33,7 +33,7 @@ library("Maaslin2")
 library("tidyverse")
 
 getwd()
-setwd("~/YanomamiMouseHFD/")
+setwd("~/Mouse-HFD-WMS/")
 getwd()
 
 list.dirs()
@@ -47,7 +47,7 @@ for (i in c(path.wk.dir)) {
   
 }; rm(i)
 
-my.exp <- "HFD1"
+my.exp <- "HFD2"
 
 path.fg.dir <- paste0(path.wk.dir, "/", my.exp ,"/figures")
 path.tb.dir <- paste0(path.wk.dir, "/", my.exp,  "/tables")
@@ -258,8 +258,8 @@ fun.get.brackets <- function(tb, tb.compm, gp_comp, gp_facet, value_var,
         label.type == "stars" & adj.p.value <= 0.05  ~ "*",
         label.type == "stars" & adj.p.value <= 0.1  ~ "~",
         label.type == "stars" ~ "ns",
-        label.type == "p.adj" & adj.p.value < 0.001 ~ "< 0.001",
-        label.type == "p.adj" ~ paste0(sprintf("%1.3f", round(adj.p.value, 3)))
+        label.type == "p.adj" & adj.p.value < 0.001 ~ "𝘱-adj < 0.001",
+        label.type == "p.adj" ~ paste0("𝘱-adj = ", sprintf("%1.3f", round(adj.p.value, 3)))
       )
     ) %>%
     ungroup()
@@ -311,8 +311,8 @@ fun.get.brackets.2 <- function(tb, tb.compm, gp_comp, gp_facet, value_var,
         label.type == "stars" & adj.p.value <= 0.05  ~ "*",
         label.type == "stars" & adj.p.value <= 0.1  ~ "~",
         label.type == "stars" ~ "ns",
-        label.type == "p.adj" & adj.p.value < 0.001 ~ "< 0.001",
-        label.type == "p.adj" ~ paste0(sprintf("%1.3f", round(adj.p.value, 3)))
+        label.type == "p.adj" & adj.p.value < 0.001 ~ "𝘱-adj < 0.001",
+        label.type == "p.adj" ~ paste0("𝘱-adj = ", sprintf("%1.3f", round(adj.p.value, 3)))
       )
     ) %>%
     ungroup()
@@ -347,32 +347,30 @@ fun.get.boxp.compm1 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = 
     gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                          fill = .data[[gp_fill]], color = .data[[gp_col]])) +
       facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-      geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+      geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
       geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
       ggpubr::stat_pvalue_manual(
         tb.brackets,
-        vjust = -1,
+        vjust = -0.5,
         xmin = "group1",
         xmax = "group2",
         y.position = "y.position",
         label = "label",
         tip.length = 0.01,
         bracket.size = 0.25,
-        size = 2.5,
+        size = 2.75,
         hide.ns = only.sig,
         inherit.aes = FALSE
       ) +
       scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
       scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
+      scale_y_continuous(expand = expansion(mult = c(0.05, 0.15))) +
       coord_cartesian(clip = "off") +
       ylab("") + xlab("") +
       my.theme.1 + 
       theme(legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+            panel.spacing = unit(1, "cm"), 
+            axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
     
     return(gg)
     
@@ -381,99 +379,17 @@ fun.get.boxp.compm1 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = 
   gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                        fill = .data[[gp_fill]], color = .data[[gp_col]])) +
     facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-    geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+    geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
     geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
     scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
     scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
+    scale_y_continuous(expand = expansion(mult = c(0.05, 0.15))) +
     coord_cartesian(clip = "off") +
     ylab("") + xlab("") +
     my.theme.1 + 
     theme(legend.position = "none",
-          legend.title = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
-  
-  return(gg)
-  
-}
-
-
-fun.get.boxp.compm2 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = NULL,
-                                gp_facet, group_var, value_var, only.sig = F, alpha = 0.1, 
-                                label.type = "stars") {
-  
-  if (is.null(gp_fill)) { gp_fill = gp_comp }
-  if (is.null(gp_col)) { gp_col = gp_comp }
-  
-  tb.brackets <- fun.get.brackets(
-    tb = tb,
-    tb.compm = tb.compm,
-    gp_facet = gp_facet,
-    gp_comp = gp_comp,
-    value_var = value_var,
-    only.sig = only.sig,
-    alpha = alpha,
-    label.type = label.type
-  )
-  
-  if (nrow(tb.brackets) > 0) {
-    
-    gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
-                         fill = .data[[gp_fill]], color = .data[[gp_col]])) +
-      facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-      geom_line(aes(group = .data[[group_var]]), color = "black", alpha = .25, linewidth = .25, 
-                position = position_jitter(w = 0.1, h = 0, seed = 123)) +
-      geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-      geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
-      ggpubr::stat_pvalue_manual(
-        tb.brackets,
-        vjust = -1,
-        xmin = "group1",
-        xmax = "group2",
-        y.position = "y.position",
-        label = "label",
-        tip.length = 0.01,
-        bracket.size = 0.25,
-        size = 2.5,
-        hide.ns = only.sig,
-        inherit.aes = FALSE
-      ) +
-      scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
-      coord_cartesian(clip = "off") +
-      ylab("") + xlab("") +
-      my.theme.1 + 
-      theme(legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
-    
-    return(gg)
-    
-  }
-  
-  gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
-                       fill = .data[[gp_fill]], color = .data[[gp_col]])) +
-    facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-    geom_line(aes(group = .data[[group_var]]), color = "black", alpha = .25, linewidth = .25, 
-              position = position_jitter(w = 0.1, h = 0, seed = 123)) +
-    geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-    geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
-    scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
-    coord_cartesian(clip = "off") +
-    ylab("") + xlab("") +
-    my.theme.1 + 
-    theme(legend.position = "none",
-          legend.title = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+          panel.spacing = unit(1, "cm"), 
+          axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
   
   return(gg)
   
@@ -495,7 +411,8 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
     value_var = value_var,
     only.sig = only.sig,
     alpha = alpha,
-    label.type = label.type
+    label.type = label.type,
+    step.mult = 0.15
   )
   
   tb.global <- tb.kruskal %>%
@@ -511,7 +428,7 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
     gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                          fill = .data[[gp_fill]], color = .data[[gp_col]])) +
       facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-      geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+      geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
       geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
       geom_text(
         data = tb.global,
@@ -519,7 +436,7 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
         inherit.aes = FALSE,
         vjust = 2,
         hjust = 0,
-        size = 2,
+        size = 2.75,
         color = "black"
       ) +
       ggpubr::stat_pvalue_manual(
@@ -530,21 +447,19 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
         label = "label",
         tip.length = 0.01,
         bracket.size = 0.25,
-        size = 2.5,
+        size = 2.75,
         hide.ns = only.sig,
         inherit.aes = FALSE
       ) +
       scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
       scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_y_continuous(expand = expansion(mult = c(0.1, 0.35))) +
+      scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
       coord_cartesian(clip = "off") +
       ylab("") + xlab("") +
       my.theme.1 + 
       theme(legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+            panel.spacing = unit(1, "cm"), 
+            axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
     
     return(gg)
     
@@ -554,7 +469,7 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
   gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                        fill = .data[[gp_fill]], color = .data[[gp_col]])) +
     facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-    geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+    geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
     geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
     geom_text(
       data = tb.global,
@@ -562,25 +477,24 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
       inherit.aes = FALSE,
       vjust = 2,
       hjust = 0,
-      size = 2,
+      size = 2.75,
       color = "black"
     ) +
     
     scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
     scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_y_continuous(expand = expansion(mult = c(0.1, 0.35))) +
+    scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
     coord_cartesian(clip = "off") +
     ylab("") + xlab("") +
     my.theme.1 + 
     theme(legend.position = "none",
-          legend.title = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+          panel.spacing = unit(1, "cm"), 
+          axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
   
   return(gg)
   
 }
+
 
 ## Data loading ----------------------------------------------------------------
 
@@ -687,25 +601,26 @@ my.theme.1 <-
         legend.title = element_blank(),
         legend.justification = c(0.5, 0.5),
         
-        strip.text = element_text(size = 10, colour = 'black', face = "bold"),
+        strip.text = element_text(size = 10, colour = 'black'),
         strip.background = element_rect(fill = NA, colour = NA),
+        strip.clip = "off",
         
         panel.background = element_rect(fill = "white"),
         panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
-        panel.border = element_rect(color = NA, linewidth = 0, fill = NA),
+        panel.border = element_blank(),
+        panel.spacing = unit(.1, "lines"),
         
         axis.ticks = element_line(color = "black", linewidth = .25),
-        axis.ticks.length = unit(1, "pt"),
+        axis.ticks.length = unit(2.5, "pt"),
         
         axis.line.x = element_line(colour = 'black', linewidth = 0.25),
         axis.line.y = element_line(colour = 'black', linewidth = 0.25),
         axis.title.x = element_text(size = 10, colour = 'black'),
         axis.title.y = element_text(size = 10, colour = 'black'),
         axis.title.y.right = element_text(size = 10, colour = 'black'),
-        axis.text.x = element_text(size = 7, colour = 'black'),
-        axis.text.y = element_text(size = 7, colour = 'black'),
-        
+        axis.text.x = element_text(size = 8, colour = 'black'),
+        axis.text.y = element_text(size = 8, colour = 'black'),
         plot.title = element_text(size = 10, face = 'bold', colour = 'black'),
         plot.subtitle = element_text(size = 6, colour = 'black'),
         plot.margin = unit(c(0.5, 0.75, 0.5, 0.75), 'cm'))
@@ -717,24 +632,26 @@ my.theme.2 <-
         legend.title = element_blank(),
         legend.justification = c(0.5, 0.5),
         
-        strip.text = element_markdown(size = 10, colour = 'black', face = "bold"),
+        strip.text = element_markdown(size = 10, colour = 'black'),
         strip.background = element_rect(fill = NA, colour = NA),
+        strip.clip = "off",
         
         panel.background = element_rect(fill = "white"),
         panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
-        panel.border = element_rect(color = NA, linewidth = 0, fill = NA),
+        panel.border = element_blank(),
+        panel.spacing = unit(.1, "lines"),
         
         axis.ticks = element_line(color = "black", linewidth = .25),
-        axis.ticks.length = unit(1, "pt"),
+        axis.ticks.length = unit(2.5, "pt"),
         
         axis.line.x = element_line(colour = 'black', linewidth = 0.25),
         axis.line.y = element_line(colour = 'black', linewidth = 0.25),
         axis.title.x = element_markdown(size = 10, colour = 'black'),
         axis.title.y = element_markdown(size = 10, colour = 'black'),
         axis.title.y.right = element_markdown(size = 10, colour = 'black'),
-        axis.text.x = element_markdown(size = 7, colour = 'black'),
-        axis.text.y = element_markdown(size = 7, colour = 'black'),
+        axis.text.x = element_markdown(size = 8, colour = 'black'),
+        axis.text.y = element_markdown(size = 8, colour = 'black'),
         
         plot.title = element_markdown(size = 10, face = 'bold', colour = 'black'),
         plot.subtitle = element_markdown(size = 6, colour = 'black'),
@@ -795,11 +712,13 @@ gg.leg.tax <- ggpubr::as_ggplot(ggpubr::get_legend(gg.leg.tax)); gg.leg.tax
 gg.leg.all <- gg.leg.gp + gg.leg.gp.tp + gg.leg.tax + plot_layout(ncol = 1, heights = c(3, 5, 8))
 gg.leg.all
 
-png(filename = paste0(path.fg.dir, "/legends.png"), width = 5000 * .65, height = 5000 * 1, units = "px", res = 1200, type = "cairo")
-
-gg.leg.all
-
-dev.off()
+{
+  png(filename = paste0(path.fg.dir, "/legends.png"), width = 5000 * .65, height = 5000 * 1, units = "px", res = 1200, type = "cairo")
+  
+  print(gg.leg.all)
+  
+  dev.off()
+}
 
 
 # Analysis ---------------------------------------------------------------------
@@ -1089,11 +1008,11 @@ gg.bp.o <- gg.bp.plots[[3]]; gg.bp.o
 gg.bp.f <- gg.bp.plots[[4]]; gg.bp.f
 gg.bp.g <- gg.bp.plots[[5]]; gg.bp.g
 
-ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_1p.png"), plot = gg.bp.p, dpi = 1200, width = 5000 * 3.5, height = 5000 * 1, units = "px")
-ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_2c.png"), plot = gg.bp.c, dpi = 1200, width = 5000 * 3.5, height = 5000 * 1, units = "px")
-ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_3o.png"), plot = gg.bp.o, dpi = 1200, width = 5000 * 3.5, height = 5000 * 1, units = "px")
-ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_4f.png"), plot = gg.bp.f, dpi = 1200, width = 5000 * 3.5, height = 5000 * 1, units = "px")
-ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_5g.png"), plot = gg.bp.g, dpi = 1200, width = 5000 * 3.5, height = 5000 * 1, units = "px")
+ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_1p.png"), plot = gg.bp.p, dpi = 1200, width = 5000 * 3.5, height = 5000 * .9, units = "px")
+ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_2c.png"), plot = gg.bp.c, dpi = 1200, width = 5000 * 3.5, height = 5000 * .9, units = "px")
+ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_3o.png"), plot = gg.bp.o, dpi = 1200, width = 5000 * 3.5, height = 5000 * .9, units = "px")
+ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_4f.png"), plot = gg.bp.f, dpi = 1200, width = 5000 * 3.5, height = 5000 * .9, units = "px")
+ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_5g.png"), plot = gg.bp.g, dpi = 1200, width = 5000 * 3.5, height = 5000 * .9, units = "px")
 
 rm(list = ls(pattern = "^tmp."))
 rm(list = ls(pattern = "^gg.bp[.]?"))
@@ -1445,6 +1364,48 @@ df.lefse.raw <-
 
 df.lefse.filt <- df.lefse.raw %>% filter(ef_lda > 2, padj < 0.05)
 
+df.ancom.raw <-
+  openxlsx::read.xlsx(xlsxFile = paste0(tmp.path, "/diff_abund/ancom.xlsx"), rowNames = F)
+
+df.ancom.filt <- 
+  df.ancom.raw %>% filter(padj < 0.05) %>% 
+  filter(comp == "Belgian: post-HFD|Yanomami: post-HFD" & ko_class == "Metabolism")
+
+tmp.to.filter <-
+  c(
+    "Biosynthesis of various plant secondary metabolites [PATH:ko00999]",
+    "Drug metabolism - cytochrome P450 [PATH:ko00982]",
+    "Flavone and flavonol biosynthesis [PATH:ko00944]",
+    "Glycosphingolipid biosynthesis - ganglio series [PATH:ko00604]",
+    "Glycosphingolipid biosynthesis - globo and isoglobo series [PATH:ko00603]",
+    "Insect hormone biosynthesis [PATH:ko00981]",
+    "Isoquinoline alkaloid biosynthesis [PATH:ko00950]",
+    "Mannose type O-glycan biosynthesis [PATH:ko00515]",
+    "Metabolism of xenobiotics by cytochrome P450 [PATH:ko00980]",
+    "Photosynthesis [PATH:ko00195]",
+    "Steroid hormone biosynthesis [PATH:ko00140]",
+    "Tropane, piperidine and pyridine alkaloid biosynthesis [PATH:ko00960]",
+    "Various types of N-glycan biosynthesis [PATH:ko00513]",
+    "Primary bile acid biosynthesis [PATH:ko00120]"
+  )
+
+
+df.diffabund.pws <- 
+  merge(df.lefse.raw %>% 
+        filter(comp == "Belgian: post-HFD|Yanomami: post-HFD" & ko_class == "Metabolism") %>%
+        mutate(ef_lda = ifelse(enrich_group == str_remove(comp, "\\|.*"), -ef_lda, ef_lda)) %>% 
+        select(ko_met_class = ko_subclass, ko_pathway = feature, enrich_group, 
+               lefse_ef_lda = ef_lda, lefse_pval = pvalue, lefse_padj = padj),
+      
+      df.ancom.raw %>% 
+        filter(comp == "Belgian: post-HFD|Yanomami: post-HFD" & ko_class == "Metabolism") %>% 
+        select(ko_met_class = ko_subclass, ko_pathway = feature, ancomBC_ef_W = ef_W, ancomBC_pval = pvalue, ancomBC_padj = padj)) %>%
+  
+  arrange(ko_met_class, enrich_group, desc(abs(lefse_ef_lda))) %>% 
+  mutate(enrich_group = ifelse(abs(lefse_ef_lda) >= 2 & lefse_padj <= 0.05, enrich_group, "Not Sig"))
+  
+openxlsx::write.xlsx(x = df.diffabund.pws, file = paste0(path.tb.dir, "/contrib/diffabund_pw.xlsx"), rowNames = F)
+
 
 ### Graph prep -----------------------------------------------------------------
 
@@ -1458,7 +1419,6 @@ tmp.tb.funtax.top.genus <-
   select(-my.colors) %>% 
   select(Phylum = Phylum2, Genus = taxa) %>% 
   mutate(across(where(is.factor), ~ as.character(.)))
-
 
 # Getting the most functionally active genus
 
@@ -1547,21 +1507,24 @@ for (i in levels(tmp.tb.funtax.top.genus$Phylum)) {
 tmp.gg.leg.funtax <- (wrap_plots(tmp.ls.gg.leg.funtax.gen) + plot_layout(nrow = 1))
 tmp.gg.leg.funtax
 
-png(filename = paste0(path.fg.dir, "/legends2.png"), width = 5000 * 2.5, height = 5000 * .5, units = "px", res = 1200, type = "cairo")
+{
+  png(filename = paste0(path.fg.dir, "/legends2.png"), width = 5000 * 2.5, height = 5000 * .5, units = "px", res = 1200, type = "cairo")
+  
+  print(tmp.gg.leg.funtax)
+  
+  dev.off()
+}
 
+tmp.gg.leg.funtax <- (wrap_plots(tmp.ls.gg.leg.funtax.gen) + plot_layout(ncol = 1, heights = c(10, 5, 3, 4, 4, 3)))
 tmp.gg.leg.funtax
 
+{
+  png(filename = paste0(path.fg.dir, "/legends3.png"), width = 5000 * .5, height = 5000 * 1.15, units = "px", res = 1200, type = "cairo")
+
+  print(tmp.gg.leg.funtax)
+  
 dev.off()
-
-tmp.gg.leg.funtax <- (wrap_plots(tmp.ls.gg.leg.funtax.gen) + plot_layout(ncol = 1, heights = c(10, 5, 4, 4, 4, 3)))
-tmp.gg.leg.funtax
-
-png(filename = paste0(path.fg.dir, "/legends3.png"), width = 5000 * .5, height = 5000 * 1.2, units = "px", res = 1200, type = "cairo")
-
-tmp.gg.leg.funtax
-
-dev.off()
-
+}
 
 tb.ko.tax.counts <-
   tb.work %>%
@@ -1577,13 +1540,11 @@ tb.ko.tax.counts <-
   data.frame(check.names = F) %>% 
   mutate(across(where(is.numeric), ~./sum(.)))
 
-
 tmp.scs <- 
   df.lefse.filt %>% 
   filter(comp == "Belgian: post-HFD|Yanomami: post-HFD" & ko_class == "Metabolism") %>% 
   pull(ko_subclass) %>% 
   unique()
-
 
 ls.funtax.pw <- list()
 
@@ -1596,6 +1557,8 @@ for (sc in tmp.scs) {
     pull(feature) %>% 
     unique() %>% 
     sort()
+  
+  tmp.funtax.pws <- tmp.funtax.pws[!tmp.funtax.pws %in% tmp.to.filter]
   
   tmp.lefse <- 
     df.lefse.filt %>% 
@@ -1636,6 +1599,8 @@ for (sc in tmp.scs) {
   
   # Sample
   
+  tmp.ancom.filt.pws <- df.ancom.filt$feature %>% unique()
+  
   tmp.tb.funtax.sc.prof.ra <- 
     tmp.funtax.sc.top.genus %>% 
     mutate(Phylum2 = factor(Phylum2, levels(tmp.tb.funtax.top.genus$Phylum))) %>% 
@@ -1645,7 +1610,11 @@ for (sc in tmp.scs) {
     mutate(donor_ethnicity2 = str_sub(donor_ethnicity, 1, 1)) %>% 
     group_by(ko_pathway, donor_ethnicity2, Genus3) %>%
     summarize(ra = mean(ra, na.rm = TRUE), .groups = 'drop') %>%
-    mutate(ko_pathway2 = str_replace(ko_pathway, " \\[PATH:", "<br>["))
+    mutate(ko_pathway2 = 
+             ifelse(ko_pathway %in% c(tmp.ancom.filt.pws), 
+                    str_glue("<sup>†</sup> {ko_pathway}"), 
+                    ko_pathway) %>% 
+             str_replace(., " \\[PATH:", "<br>["))
   
   tmp.tb.funtax.sc.summary <- 
     tmp.tb.funtax.sc.prof.ra %>% 
@@ -1663,7 +1632,7 @@ for (sc in tmp.scs) {
            mutate(ko_pathway2 = factor(ko_pathway2, levels = levels(tmp.tb.funtax.sc.summary$ko_pathway2))), 
          aes(y = donor_ethnicity2)) + 
     geom_bar(aes(x = ra, fill = Genus3), stat = "identity", position = "stack", width = .75) +
-    geom_text(data = tmp.tb.funtax.sc.summary, aes(x = my.label.pos, y = 1.5, label = my.label), vjust = .5, hjust = -.25, size = 2.25, color = "black", check_overlap = T) +
+    geom_text(data = tmp.tb.funtax.sc.summary, aes(x = my.label.pos, y = 1.5, label = my.label), vjust = .5, hjust = -.25, size = 2.5, color = "black", check_overlap = T) +
     facet_grid(ko_pathway2 ~ ., scales = "free", space = "free", switch = "y") +
     scale_x_continuous(expand = expansion(mult = c(0, .2), add = 0), labels = scales::percent_format(accuracy = .01, suffix = "")) +
     scale_y_discrete(expand = expansion(mult = 0.025, add = .75)) +
@@ -1672,11 +1641,12 @@ for (sc in tmp.scs) {
     labs(title = paste0(sc, "<br>")) +
     coord_transform(x = "sqrt", clip = "off") +
     my.theme.2 + 
-    theme(strip.text.y.left = element_markdown(size = 8, colour = 'black', face = "bold", angle = 0, hjust = 1, lineheight = 1.15),
+    theme(strip.text.y.left = element_markdown(size = 8, colour = 'black', face = "plain", angle = 0, hjust = 1, lineheight = 1.15),
           strip.placement = "outside",
           panel.spacing = unit(.1, "lines"),
-          plot.title = element_markdown(size = 10, face = 'bold', colour = 'black'), 
-          plot.margin = unit(c(0.5, 1, 0.5, 0.75), 'cm')) -> tmp.gg.funtax
+          plot.title = element_markdown(size = 10, face = 'bold', hjust = 1, colour = 'black'), 
+          plot.margin = unit(c(0.5, 1, 0.5, 0.75), 'cm'),
+          axis.text.x = element_markdown(size = 7, colour = 'black', angle = 45, hjust = 1, vjust = 1)) -> tmp.gg.funtax; tmp.gg.funtax
   
   ls.funtax.pw[[sc]] <- tmp.gg.funtax
   
@@ -1700,7 +1670,7 @@ for (sc in tmp.scs) {
     arrange(ko_pathway, -mean_of_cols) %>% 
     select(-mean_of_cols) %>% 
     data.frame(check.names = F) -> tmp.2
-    
+  
   tmp.2 %>% 
     group_by(across(starts_with("ko_"))) %>% 
     slice_head(n = 10) -> tmp.3
@@ -1714,6 +1684,7 @@ ls.funtax.pw
 my.hei <- 
   df.lefse.filt %>% 
   filter(comp == "Belgian: post-HFD|Yanomami: post-HFD" & ko_class == "Metabolism") %>% 
+  filter(!feature %in% tmp.to.filter) %>% 
   mutate(ko_subclass = factor(ko_subclass, tmp.scs)) %>% 
   arrange(ko_subclass) %>% 
   select(ko_subclass, feature) %>%
@@ -1727,7 +1698,7 @@ tmp.gg.funtax <- (wrap_plots(ls.funtax.pw) + plot_layout(ncol = 1, heights = unn
 tmp.gg.funtax
 
 {
-  png(filename = paste0(path.fg.dir, "/contrib/contrib_pws.png"), width = 2500 * 1.65, height = 2500 * 6, units = "px", res = 600, type = "cairo")
+  png(filename = paste0(path.fg.dir, "/contrib/contrib_pws.png"), width = 2500 * 1.35, height = 2500 * 10, units = "px", res = 600, type = "cairo")
   
   print(tmp.gg.funtax)
   

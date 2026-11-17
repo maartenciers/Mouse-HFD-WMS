@@ -32,7 +32,7 @@ library("Maaslin2")
 library("tidyverse")
 
 getwd()
-setwd("~/YanomamiMouseHFD/")
+setwd("~/Mouse-HFD-WMS/")
 getwd()
 
 list.dirs()
@@ -44,9 +44,9 @@ for (i in c(path.wk.dir)) {
   
   if (!dir.exists(i)) { dir.create(i) }
   
-}; remove(i)
+}; rm(i)
 
-my.exp <- "HFD1"
+my.exp <- "ALL"
 
 path.fg.dir <- paste0(path.wk.dir, "/", my.exp ,"/figures")
 path.tb.dir <- paste0(path.wk.dir, "/", my.exp,  "/tables")
@@ -55,7 +55,7 @@ for (i in c(path.fg.dir, path.tb.dir)) {
   
   if (!dir.exists(i)) { dir.create(i, recursive = T) }
   
-}; remove(i)
+}; rm(i)
 
 
 ## Functions -------------------------------------------------------------------
@@ -257,8 +257,8 @@ fun.get.brackets <- function(tb, tb.compm, gp_comp, gp_facet, value_var,
         label.type == "stars" & adj.p.value <= 0.05  ~ "*",
         label.type == "stars" & adj.p.value <= 0.1  ~ "~",
         label.type == "stars" ~ "ns",
-        label.type == "p.adj" & adj.p.value < 0.001 ~ "𝘱-adj < 0.001",
-        label.type == "p.adj" ~ paste0("𝘱-adj = ", sprintf("%1.3f", round(adj.p.value, 3)))
+        label.type == "p.adj" & adj.p.value < 0.001 ~ "< 0.001",
+        label.type == "p.adj" ~ paste0(sprintf("%1.3f", round(adj.p.value, 3)))
       )
     ) %>%
     ungroup()
@@ -310,8 +310,8 @@ fun.get.brackets.2 <- function(tb, tb.compm, gp_comp, gp_facet, value_var,
         label.type == "stars" & adj.p.value <= 0.05  ~ "*",
         label.type == "stars" & adj.p.value <= 0.1  ~ "~",
         label.type == "stars" ~ "ns",
-        label.type == "p.adj" & adj.p.value < 0.001 ~ "𝘱-adj < 0.001",
-        label.type == "p.adj" ~ paste0("𝘱-adj = ", sprintf("%1.3f", round(adj.p.value, 3)))
+        label.type == "p.adj" & adj.p.value < 0.001 ~ "< 0.001",
+        label.type == "p.adj" ~ paste0(sprintf("%1.3f", round(adj.p.value, 3)))
       )
     ) %>%
     ungroup()
@@ -323,7 +323,7 @@ fun.upper.whisker <- function(x) {
   boxplot.stats(x)$stats[5]
 }
 
-fun.get.boxp.compm1 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = NULL,
+fun.get.boxp.compm1 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = NULL, gp_shape = NULL,
                                 gp_facet, value_var, only.sig = F, alpha = 0.1, 
                                 label.type = "stars") {
   
@@ -346,34 +346,32 @@ fun.get.boxp.compm1 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = 
     gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                          fill = .data[[gp_fill]], color = .data[[gp_col]])) +
       facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-      geom_point(shape = 21, color = "white", size = 2.5, position = position_jitter(w = 0.2, h = 0, seed = 123)) +  
-      #eom_jitter(shape = 16, alpha = 1, size = 1, width = .25, height = 0) + 
-      #geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-      stat_summary(aes(group = .data[[gp_comp]]), geom = "crossbar", fun = "mean", color = "black", width = 0.5, linewidth = .25) +
+      geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+      {if(is.null(gp_shape)) geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123))} +
+      {if(!is.null(gp_shape)) geom_point(aes(shape = .data[[gp_shape]]), size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123))} +
+      {if(!is.null(gp_shape)) scale_shape_manual(values = shapes.exp)} +
       ggpubr::stat_pvalue_manual(
         tb.brackets,
-        vjust = -1,
+        vjust = -0.5,
         xmin = "group1",
         xmax = "group2",
         y.position = "y.position",
         label = "label",
         tip.length = 0.01,
         bracket.size = 0.25,
-        size = 2.5,
+        size = 2.75,
         hide.ns = only.sig,
         inherit.aes = FALSE
       ) +
       scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
       scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
+      scale_y_continuous(expand = expansion(mult = c(0.05, 0.15))) +
       coord_cartesian(clip = "off") +
       ylab("") + xlab("") +
       my.theme.1 + 
       theme(legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+            panel.spacing = unit(1, "cm"), 
+            axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
     
     return(gg)
     
@@ -381,115 +379,27 @@ fun.get.boxp.compm1 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = 
   
   gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                        fill = .data[[gp_fill]], color = .data[[gp_col]])) +
-    facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-    geom_point(shape = 21, color = "white", size = 2.5, position = position_jitter(w = 0.2, h = 0, seed = 123)) +  
-    #eom_jitter(shape = 16, alpha = 1, size = 1, width = .25, height = 0) + 
-    #geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-    stat_summary(aes(group = .data[[gp_comp]]), geom = "crossbar", fun = "mean", color = "black", width = 0.5, linewidth = .25) +
     
+    facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
+    geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+    {if(is.null(gp_shape)) geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123))} +
+    {if(!is.null(gp_shape)) geom_point(aes(shape = .data[[gp_shape]]), size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123))} +
+    {if(!is.null(gp_shape)) scale_shape_manual(values = shapes.exp)} +    
     scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
     scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
+    scale_y_continuous(expand = expansion(mult = c(0.05, 0.15))) +
     coord_cartesian(clip = "off") +
     ylab("") + xlab("") +
     my.theme.1 + 
     theme(legend.position = "none",
-          legend.title = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+          panel.spacing = unit(1, "cm"), 
+          axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
   
   return(gg)
   
 }
 
-
-fun.get.boxp.compm2 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = NULL,
-                                gp_facet, group_var, value_var, only.sig = F, alpha = 0.1, 
-                                label.type = "stars") {
-  
-  if (is.null(gp_fill)) { gp_fill = gp_comp }
-  if (is.null(gp_col)) { gp_col = gp_comp }
-  
-  tb.brackets <- fun.get.brackets(
-    tb = tb,
-    tb.compm = tb.compm,
-    gp_facet = gp_facet,
-    gp_comp = gp_comp,
-    value_var = value_var,
-    only.sig = only.sig,
-    alpha = alpha,
-    label.type = label.type
-  )
-  
-  if (nrow(tb.brackets) > 0) {
-    
-    gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
-                         fill = .data[[gp_fill]], color = .data[[gp_col]])) +
-      facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-      geom_line(aes(group = .data[[group_var]]), color = "black", alpha = .25, linewidth = .25, 
-                position = position_jitter(w = 0.2, h = 0, seed = 123)) +
-      geom_point(shape = 21, color = "white", size = 2.5, position = position_jitter(w = 0.2, h = 0, seed = 123)) +  
-      #eom_jitter(shape = 16, alpha = 1, size = 1, width = .25, height = 0) + 
-      #geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-      stat_summary(aes(group = .data[[gp_comp]]), geom = "crossbar", fun = "mean", color = "black", width = 0.5, linewidth = .25) +
-      ggpubr::stat_pvalue_manual(
-        tb.brackets,
-        vjust = -1,
-        xmin = "group1",
-        xmax = "group2",
-        y.position = "y.position",
-        label = "label",
-        tip.length = 0.01,
-        bracket.size = 0.25,
-        size = 2.5,
-        hide.ns = only.sig,
-        inherit.aes = FALSE
-      ) +
-      scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
-      coord_cartesian(clip = "off") +
-      ylab("") + xlab("") +
-      my.theme.1 + 
-      theme(legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
-    
-    return(gg)
-    
-  }
-  
-  gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
-                       fill = .data[[gp_fill]], color = .data[[gp_col]])) +
-    facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-    geom_line(aes(group = .data[[group_var]]), color = "black", alpha = .25, linewidth = .25, 
-              position = position_jitter(w = 0.2, h = 0, seed = 123)) +
-    geom_point(shape = 21, color = "white", size = 2.5, position = position_jitter(w = 0.2, h = 0, seed = 123)) +  
-    #eom_jitter(shape = 16, alpha = 1, size = 1, width = .25, height = 0) + 
-    #geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-    stat_summary(aes(group = .data[[gp_comp]]), geom = "crossbar", fun = "mean", color = "black", width = 0.5, linewidth = .25) +
-    
-    scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
-    coord_cartesian(clip = "off") +
-    ylab("") + xlab("") +
-    my.theme.1 + 
-    theme(legend.position = "none",
-          legend.title = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
-  
-  return(gg)
-  
-}
-
-
-fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NULL, gp_col = NULL,
+fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NULL, gp_col = NULL, gp_shape = NULL,
                                 gp_facet, value_var,
                                 only.sig = F, alpha = 0.1, label.type = "stars") {
   
@@ -504,7 +414,8 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
     value_var = value_var,
     only.sig = only.sig,
     alpha = alpha,
-    label.type = label.type
+    label.type = label.type,
+    step.mult = 0.15
   )
   
   tb.global <- tb.kruskal %>%
@@ -520,18 +431,17 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
     gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                          fill = .data[[gp_fill]], color = .data[[gp_col]])) +
       facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-      geom_point(shape = 21, color = "white", size = 2.5, position = position_jitter(w = 0.2, h = 0, seed = 123)) +  
-      #eom_jitter(shape = 16, alpha = 1, size = 1, width = .25, height = 0) + 
-      #geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-      stat_summary(aes(group = .data[[gp_comp]]), geom = "crossbar", fun = "mean", color = "black", width = 0.5, linewidth = .25) +
-      #stat_summary(fun = "mean", color = "black", fill = "white", shape = 23, size = 0.25, stroke = 0.25) +
+      geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+      {if(is.null(gp_shape)) geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123))} +
+      {if(!is.null(gp_shape)) geom_point(aes(shape = .data[[gp_shape]]), size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123))} +
+      {if(!is.null(gp_shape)) scale_shape_manual(values = shapes.exp)} +
       geom_text(
         data = tb.global,
         aes(x = 0.5, y = Inf, label = p.full),
         inherit.aes = FALSE,
         vjust = 2,
         hjust = 0,
-        size = 2,
+        size = 2.75,
         color = "black"
       ) +
       ggpubr::stat_pvalue_manual(
@@ -542,21 +452,19 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
         label = "label",
         tip.length = 0.01,
         bracket.size = 0.25,
-        size = 2.5,
+        size = 2.75,
         hide.ns = only.sig,
         inherit.aes = FALSE
       ) +
       scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
       scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_y_continuous(expand = expansion(mult = c(0.1, 0.35))) +
+      scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
       coord_cartesian(clip = "off") +
       ylab("") + xlab("") +
       my.theme.1 + 
       theme(legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+            panel.spacing = unit(1, "cm"), 
+            axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
     
     return(gg)
     
@@ -566,32 +474,29 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
   gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                        fill = .data[[gp_fill]], color = .data[[gp_col]])) +
     facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-    geom_point(shape = 21, color = "white", size = 2.5, position = position_jitter(w = 0.2, h = 0, seed = 123)) +  
-    #eom_jitter(shape = 16, alpha = 1, size = 1, width = .25, height = 0) + 
-    #geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-    stat_summary(aes(group = .data[[gp_comp]]), geom = "crossbar", fun = "mean", color = "black", width = 0.5, linewidth = .25) +
-    #stat_summary(fun = "mean", color = "black", fill = "white", shape = 23, size = 0.25, stroke = 0.25) +
+    geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+    {if(is.null(gp_shape)) geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123))} +
+    {if(!is.null(gp_shape)) geom_point(aes(shape = .data[[gp_shape]]), size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123))} +
+    {if(!is.null(gp_shape)) scale_shape_manual(values = shapes.exp)} +
     geom_text(
       data = tb.global,
       aes(x = 0.5, y = Inf, label = p.full),
       inherit.aes = FALSE,
       vjust = 2,
       hjust = 0,
-      size = 2,
+      size = 2.75,
       color = "black"
     ) +
     
     scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
     scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_y_continuous(expand = expansion(mult = c(0.1, 0.35))) +
+    scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
     coord_cartesian(clip = "off") +
     ylab("") + xlab("") +
     my.theme.1 + 
     theme(legend.position = "none",
-          legend.title = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+          panel.spacing = unit(1, "cm"), 
+          axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
   
   return(gg)
   
@@ -607,18 +512,22 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
 # Metadata
 tb.metad <- 
   read.delim(paste0(getwd(), "/misc/metadata_full.tsv")) %>% 
-  filter(experiment == my.exp) %>% 
+  filter(experiment_type == "high-fat diet") %>% 
   mutate(timepoint = case_when(
     experiment_type == "high-fat diet" & timepoint == "T1" ~ "pre-HFD",
     experiment_type == "high-fat diet" & timepoint == "T2" ~ "post-HFD",
   )) %>% 
+  mutate(mouse_n = str_glue("{donor_id}")) %>% 
   mutate(donor_ethnicity = ifelse(donor_ethnicity == "Western", "Belgian", donor_ethnicity)) %>% 
-  select(sample_id, assembly_id, donor_id:cage_id, mouse_n, timepoint) %>% 
+  select(experiment, sample_id, assembly_id, donor_id:cage_id, mouse_n, timepoint) %>% 
   mutate(donor_ethnicity = factor(donor_ethnicity, c("Belgian", "Yanomami"))) %>% 
   mutate(timepoint = factor(timepoint, c("pre-HFD", "post-HFD"))) %>% 
-  arrange(donor_ethnicity, timepoint, mouse_n) %>% 
+  mutate(experiment = factor(experiment, levels = unique(.$experiment) %>% sort())) %>% 
+  arrange(experiment, donor_ethnicity, timepoint, mouse_n) %>% 
   mutate(donor_ethnicity_timepoint = str_glue("{donor_ethnicity}: {timepoint}")) %>% 
-  mutate(donor_ethnicity_timepoint = factor(donor_ethnicity_timepoint, unique(.$donor_ethnicity_timepoint))); head(tb.metad)
+  mutate(donor_ethnicity_timepoint = factor(donor_ethnicity_timepoint, unique(.$donor_ethnicity_timepoint))) %>% 
+  mutate(mouse_n = str_replace(mouse_n, "Donor-2-MCBL1", "BEL-051")) %>%
+  mutate(mouse_n = factor(mouse_n, unique(.$mouse_n))); head(tb.metad)
 
 # Taxonomy + Counts
 
@@ -655,7 +564,27 @@ for (i in unique(tb.metad$assembly_id)) {
 
 tmp.taxa.counts <- 
   reduce(ls.taxa.counts, full_join) %>% 
-  mutate(across(where(is.numeric), ~replace_na(., 0)))
+  pivot_longer(cols = any_of(tb.metad$sample_id), names_to = "sample_id", values_to = "cpm") %>% 
+  mutate(across(where(is.numeric), ~replace_na(., 0))) %>% 
+  merge(tb.metad %>% select(-c(cage_id)), ., by = "sample_id") %>% 
+  group_by(across(-c(sample_id, cpm))) %>% 
+  summarise(cpm = mean(cpm, na.rm = T), .groups = "drop") %>% 
+  mutate(sample_id = ifelse(timepoint == "pre-HFD", str_glue("{mouse_n}_T1"), str_glue("{mouse_n}_T2"))) %>% 
+  select(tax_id:Species, sample_id, cpm) %>% 
+  pivot_wider(names_from = "sample_id", values_from = "cpm") %>% 
+  data.frame(check.names = F)
+
+tb.metad <- 
+  tb.metad %>% 
+  select(-c(sample_id, cage_id)) %>% 
+  mutate(sample_id = ifelse(timepoint == "pre-HFD", str_glue("{mouse_n}_T1"), str_glue("{mouse_n}_T2"))) %>% 
+  select(experiment, sample_id, everything()) %>% 
+  distinct() %>% 
+  mutate(donor_id = str_replace(donor_id, "Donor-2-MCBL1", "BEL-051")) %>%
+  group_by(donor_ethnicity) %>%
+  mutate(pair = paste0("pair_", match(donor_id, unique(donor_id)))) %>%
+  ungroup() %>% 
+  data.frame(check.names = F)
 
 tmp.tb.metad <- tb.metad %>% rename(ID = sample_id)
 
@@ -702,25 +631,26 @@ my.theme.1 <-
         legend.title = element_blank(),
         legend.justification = c(0.5, 0.5),
         
-        strip.text = element_text(size = 10, colour = 'black', face = "bold"),
+        strip.text = element_text(size = 10, colour = 'black'),
         strip.background = element_rect(fill = NA, colour = NA),
+        strip.clip = "off",
         
         panel.background = element_rect(fill = "white"),
         panel.grid.minor = element_blank(),
-        panel.grid.major = element_line(color = "gray95", linewidth = 0.5, linetype = 1),
-        panel.border = element_rect(color = "black", linewidth = 0, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.border = element_blank(),
+        panel.spacing = unit(.1, "lines"),
         
         axis.ticks = element_line(color = "black", linewidth = .25),
-        axis.ticks.length = unit(1, "pt"),
+        axis.ticks.length = unit(2.5, "pt"),
         
         axis.line.x = element_line(colour = 'black', linewidth = 0.25),
         axis.line.y = element_line(colour = 'black', linewidth = 0.25),
-        axis.title.x = element_text(size = 10, face = 'bold', colour = 'black'),
-        axis.title.y = element_text(size = 10, face = 'bold', colour = 'black'),
-        axis.title.y.right = element_text(size = 10, face = 'bold', colour = 'black'),
-        axis.text.x = element_text(size = 6, colour = 'black'),
-        axis.text.y = element_text(size = 6, colour = 'black'),
-        
+        axis.title.x = element_text(size = 10, colour = 'black'),
+        axis.title.y = element_text(size = 10, colour = 'black'),
+        axis.title.y.right = element_text(size = 10, colour = 'black'),
+        axis.text.x = element_text(size = 8, colour = 'black'),
+        axis.text.y = element_text(size = 8, colour = 'black'),
         plot.title = element_text(size = 10, face = 'bold', colour = 'black'),
         plot.subtitle = element_text(size = 6, colour = 'black'),
         plot.margin = unit(c(0.5, 0.75, 0.5, 0.75), 'cm'))
@@ -732,28 +662,31 @@ my.theme.2 <-
         legend.title = element_blank(),
         legend.justification = c(0.5, 0.5),
         
-        strip.text = element_markdown(size = 10, colour = 'black', face = "bold"),
+        strip.text = element_markdown(size = 10, colour = 'black'),
         strip.background = element_rect(fill = NA, colour = NA),
+        strip.clip = "off",
         
         panel.background = element_rect(fill = "white"),
         panel.grid.minor = element_blank(),
-        panel.grid.major = element_line(color = "gray95", linewidth = 0.5, linetype = 1),
-        panel.border = element_rect(color = "black", linewidth = 0, fill = NA),
+        panel.grid.major = element_blank(),
+        panel.border = element_blank(),
+        panel.spacing = unit(.1, "lines"),
         
         axis.ticks = element_line(color = "black", linewidth = .25),
-        axis.ticks.length = unit(1, "pt"),
+        axis.ticks.length = unit(2.5, "pt"),
         
         axis.line.x = element_line(colour = 'black', linewidth = 0.25),
         axis.line.y = element_line(colour = 'black', linewidth = 0.25),
-        axis.title.x = element_markdown(size = 10, face = 'bold', colour = 'black'),
-        axis.title.y = element_markdown(size = 10, face = 'bold', colour = 'black'),
-        axis.title.y.right = element_markdown(size = 10, face = 'bold', colour = 'black'),
-        axis.text.x = element_markdown(size = 6, colour = 'black'),
-        axis.text.y = element_markdown(size = 6, colour = 'black'),
+        axis.title.x = element_markdown(size = 10, colour = 'black'),
+        axis.title.y = element_markdown(size = 10, colour = 'black'),
+        axis.title.y.right = element_markdown(size = 10, colour = 'black'),
+        axis.text.x = element_markdown(size = 8, colour = 'black'),
+        axis.text.y = element_markdown(size = 8, colour = 'black'),
         
         plot.title = element_markdown(size = 10, face = 'bold', colour = 'black'),
         plot.subtitle = element_markdown(size = 6, colour = 'black'),
         plot.margin = unit(c(0.5, 0.75, 0.5, 0.75), 'cm'))
+
 
 # Colors
 
@@ -765,6 +698,12 @@ names(colors.gp.tp) <- levels(tb.metad$donor_ethnicity_timepoint)
 
 colors.tax <- c("#B06888FF", "#5080C8FF", "#E8B800FF", "#18C898FF", "#F88048FF", "#C8C8C8FF", "#303028FF")
 names(colors.tax) <- c("p: Bacillota", "p: Bacteroidota", "p: Verrucomicrobiota", "p: Pseudomonadota", "p: Actinomycetota", "Other: Bacteria", "Other: Domains")
+
+colors.exp <- c("#D9D9D9FF", "#969696FF", "#525252FF", "#252525FF", "#000000FF")
+names(colors.exp) <- paste0("HFD", 1:5)
+
+shapes.exp <- c(21, 22, 23, 24, 25, 3, 4)
+names(shapes.exp) <- unique(tb.metad$pair)
 
 # Legends
 
@@ -807,14 +746,30 @@ gg.leg.tax <-
 
 gg.leg.tax <- ggpubr::as_ggplot(ggpubr::get_legend(gg.leg.tax)); gg.leg.tax
 
-gg.leg.all <- gg.leg.gp + gg.leg.gp.tp + gg.leg.tax + plot_layout(ncol = 1, heights = c(3, 5, 8))
+gg.leg.exp.shape <-
+  ggplot(tb.metad %>% filter(!is.na(pair)), aes(x = 1, y = pair, shape = pair)) + 
+  geom_point(size = 2, fill = "black") + 
+  scale_shape_manual(values = shapes.exp) + 
+  my.theme.1 + 
+  theme(legend.position = "right",
+        legend.title = element_blank(),
+        legend.text = element_text(size = 8, colour = 'black', margin = margin(2, 0, 2, 5)),
+        legend.key.size = unit(.5, 'lines'),
+        legend.justification = c(0, .5))
+
+gg.leg.exp.shape <- ggpubr::as_ggplot(ggpubr::get_legend(gg.leg.exp.shape))
+
+
+gg.leg.all <- gg.leg.gp + gg.leg.gp.tp + gg.leg.tax + gg.leg.exp.shape + plot_layout(ncol = 1, heights = c(3, 5, 8, 8))
 gg.leg.all
 
-png(filename = paste0(path.fg.dir, "/legends.png"), width = 5000 * .65, height = 5000 * 1, units = "px", res = 1200, type = "cairo")
-
-gg.leg.all
-
-dev.off()
+{
+  png(filename = paste0(path.fg.dir, "/legends.png"), width = 5000 * .65, height = 5000 * 1, units = "px", res = 1200, type = "cairo")
+  
+  print(gg.leg.all)
+  
+  dev.off()
+}
 
 
 # Analysis ---------------------------------------------------------------------
@@ -847,7 +802,6 @@ ls.glom.tb <- list(
   
 )
 
-
 fun.get.filt.tax.glom <- function(my.glom.ps, min.prev = 0.1, min.max.abs = 0) {
   
   tmp.ps <- phyloseq_filter_prevalence(phyloseq_filter_sample_wise_abund_trim(my.glom.ps, minabund = min.max.abs, relabund = T), prev.trh = min.prev)
@@ -855,7 +809,6 @@ fun.get.filt.tax.glom <- function(my.glom.ps, min.prev = 0.1, min.max.abs = 0) {
   return(merge(tax_table(tmp.ps), otu_table(tmp.ps), by = "row.names", all = T)[-1])
   
 }
-
 
 ls.glom.tb.filt <- list(
   
@@ -909,6 +862,8 @@ ls.glom.ps.filt <- list(
 ranks <- c("Phylum", "Class", "Order", "Family", "Genus", "Species")
 
 top.phylum <- c("Bacillota", "Bacteroidota", "Verrucomicrobiota", "Pseudomonadota", "Actinomycetota")
+
+save.image(paste0(path.wk.dir, "/", my.exp,  "/tax-profiler_v3.RData"))
 
 
 ### Samples --------------------------------------------------------------------
@@ -1024,10 +979,10 @@ for (i in seq_along(ranks)) {
     summarise(across(.cols = any_of(tb.metad$sample_id), ~ sum(.x, na.rm = TRUE)), .groups = "drop") -> tmp.tb.glom.c
   
   tmp.tb.glom.c %>% 
-    mutate(across(tb.metad$sample_id, ~as.numeric(.))) %>% 
+    mutate(across(tb.metad %>% pull(sample_id), ~as.numeric(.))) %>% 
     mutate(across(where(is.numeric), ~./sum(.))) %>% 
     filter(complete.cases(.)) %>% 
-    mutate(across(tb.metad$sample_id, ~as.numeric(.))) %>% 
+    mutate(across(tb.metad %>% pull(sample_id), ~as.numeric(.))) %>% 
     merge(x = reshape2::melt(.), y = tb.metad, by.x = "variable", by.y = "sample_id") %>% 
     arrange(., taxa2, -value) -> tmp.tb.glom.top
   
@@ -1082,9 +1037,12 @@ for (i in seq_along(ranks)) {
   }
   
   gg.bp <- 
-    ggplot(tmp.tb.glom.top, aes(fill = taxa2, x = mouse_n, y = value)) + 
+    ggplot(tmp.tb.glom.top %>% 
+             mutate(group = paste0(str_sub(donor_ethnicity, 1, 1), "_", str_remove_all(variable, ".*_"))) %>% 
+             mutate(d_ethnicity = paste0(str_sub(donor_ethnicity, 1, 1))) %>% 
+             mutate(t_point = paste0(str_remove_all(variable, ".*_"))), aes(fill = taxa2, x = mouse_n, y = value)) + 
     geom_bar(position = position_stack(reverse = F), stat = 'summary', fun = 'mean', width = .95) +
-    facet_grid(. ~ donor_ethnicity + timepoint, space = "free_x", scales = "free_x") +
+    facet_grid(. ~ d_ethnicity + t_point, scales = "free", space = "free") +
     scale_y_continuous(expand = expansion(mult = 0.0025, add = 0), labels = scales::percent_format(accuracy = 1, suffix = "")) +
     scale_x_discrete(expand = expansion(mult = 0, add = 0)) +
     scale_fill_manual(values = tmp.colors) +  
@@ -1107,12 +1065,12 @@ gg.bp.f <- gg.bp.plots[[4]]; gg.bp.f
 gg.bp.g <- gg.bp.plots[[5]]; gg.bp.g
 gg.bp.s <- gg.bp.plots[[6]]; gg.bp.s
 
-ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_1p.png"), plot = gg.bp.p, dpi = 1200, width = 5000 * 3.5, height = 5000 * 0.75, units = "px")
-ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_2c.png"), plot = gg.bp.c, dpi = 1200, width = 5000 * 3.5, height = 5000 * 0.75, units = "px")
-ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_3o.png"), plot = gg.bp.o, dpi = 1200, width = 5000 * 3.5, height = 5000 * 0.75, units = "px")
-ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_4f.png"), plot = gg.bp.f, dpi = 1200, width = 5000 * 3.5, height = 5000 * 0.75, units = "px")
-ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_5g.png"), plot = gg.bp.g, dpi = 1200, width = 5000 * 3.5, height = 5000 * 0.75, units = "px")
-ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_6s.png"), plot = gg.bp.s, dpi = 1200, width = 5000 * 3.5, height = 5000 * 0.75, units = "px")
+ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_1p.png"), plot = gg.bp.p, dpi = 1200, width = 5000 * 3.5, height = 5000 * 0.8, units = "px")
+ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_2c.png"), plot = gg.bp.c, dpi = 1200, width = 5000 * 3.5, height = 5000 * 0.8, units = "px")
+ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_3o.png"), plot = gg.bp.o, dpi = 1200, width = 5000 * 3.5, height = 5000 * 0.8, units = "px")
+ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_4f.png"), plot = gg.bp.f, dpi = 1200, width = 5000 * 3.5, height = 5000 * 0.8, units = "px")
+ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_5g.png"), plot = gg.bp.g, dpi = 1200, width = 5000 * 3.5, height = 5000 * 0.8, units = "px")
+ggsave(filename = paste0(path.fg.dir, "/profiles/bp-tax-top-sample_6s.png"), plot = gg.bp.s, dpi = 1200, width = 5000 * 3.5, height = 5000 * 0.8, units = "px")
 
 rm(list = ls(pattern = "^tmp."))
 rm(list = ls(pattern = "^gg.bp[.]?"))
@@ -1296,7 +1254,7 @@ for (i in seq_along(ranks)) {
     scale_y_continuous(expand = expansion(mult = 0.0025, add = 0), labels = scales::percent_format(accuracy = 1, suffix = "")) +
     scale_x_discrete(expand = expansion(mult = 0, add = 0)) +
     scale_fill_manual(values = tmp.colors) +  
-    labs(fill = tmp.rank) + xlab("") + ylab("Rel. abundance (%)<br>") +
+    labs(fill = tmp.rank) + xlab("") + ylab("Relative abundance (%)<br>") +
     guides(fill=guide_legend(ncol = ifelse(length(unique(tmp.tb.glom.top$taxa2)) > 10, 1, 1))) +
     my.theme.2 + 
     theme(panel.spacing = unit(.1, "lines"), 
@@ -1394,7 +1352,7 @@ bind_rows(ls.glom.unclass.group) %>%
   merge(tb.metad, ., by = "sample_id") %>% 
   mutate(rank = factor(rank, levels = unique(rank))) -> tb.glom.unclass.group
 
-fun.get.summary(tb = tb.glom.unclass.group, gp_comp = "donor_ethnicity_timepoint", gp_facet = c("status", "rank"), value_var = "perc") %>% 
+fun.get.summary(tb = tb.glom.unclass.group, gp_comp = c("experiment", "donor_ethnicity_timepoint"), gp_facet = c("status", "rank"), value_var = "perc") %>% 
   arrange(rank, donor_ethnicity_timepoint, status) %>% 
   mutate(full_mean = str_glue("{round(mean, 4)*100} (±{round(sd, 4)*100})")) -> tb.glom.unclass.group
 
@@ -1439,12 +1397,12 @@ for (i in seq_along(ls.glom.tb.filt.perc)) {
     mutate(across(where(is.character), .fns = ~factor(., unique(.)))) %>% 
     pivot_longer(cols = tb.metad$sample_id, names_to = "sample_id", values_to = "perc") %>% 
     merge(., tb.metad, by = "sample_id") %>% 
-    group_by(donor_ethnicity_timepoint, across(2:(2+i))) %>% 
+    group_by(experiment, donor_ethnicity_timepoint, across(2:(2+i))) %>% 
     summarise(mean = mean(perc), sd = sd(perc), .groups = "drop") %>% 
     mutate(full_mean = str_glue("{round(mean, 4)*100} (±{round(sd, 4)*100})")) %>% 
     select(-c(mean,sd)) %>% 
-    pivot_wider(names_from = donor_ethnicity_timepoint, values_from = full_mean) %>% 
-    select(1:(1+i), starts_with(levels(tb.metad$donor_ethnicity_timepoint))) %>% 
+    pivot_wider(names_from = c(experiment, donor_ethnicity_timepoint), values_from = full_mean) %>% 
+    select(1:(1+i), starts_with(levels(tb.metad$experiment))) %>% 
     arrange(across(all_of(tmp.rank)))
   
 }
@@ -1525,11 +1483,12 @@ for (i in ranks) {
                         tb.compm = ls.adiv.compm[[i]], 
                         gp_facet = "var", 
                         gp_comp = "donor_ethnicity_timepoint",
+                        gp_shape = "pair",
                         value_var = "value",
                         only.sig = T,
                         alpha = 1,
                         label.type = "p.adj") + 
-    labs(title = paste0(i, "\n")) + 
+    labs(title = paste0(i, "\n")) + ylab(paste0(my.cond, "\n")) +  
     theme(plot.title = element_text(size = 12, face = 'bold', colour = 'black'))
   
   print(ls.adiv.gg[[i]] )
@@ -1545,16 +1504,15 @@ ls.adiv.res <- list(
   
 )
 
-
 openxlsx::write.xlsx(x = ls.adiv.res, file = paste0(path.tb.dir, "/diversity/alpha-div-", my.cond, ".xlsx"), rowNames = F)
 
-
-png(filename = paste0(path.fg.dir, "/diversity/alpha-div-", my.cond, ".png"), width = 5000 * 1.1, height = 5000 * 3.5, units = "px", res = 1200, type = "cairo")
-
-print(wrap_plots(ls.adiv.gg) + plot_layout(ncol = 1))
-
-dev.off()
-
+{
+  png(filename = paste0(path.fg.dir, "/diversity/alpha-div-", my.cond, ".png"), width = 5000 * 1.1, height = 5000 * 4.75, units = "px", res = 1200, type = "cairo")
+  
+  print(wrap_plots(ls.adiv.gg) + plot_layout(ncol = 1))
+  
+  dev.off()
+}
 
 # T2
 
@@ -1583,11 +1541,12 @@ for (i in ranks) {
                         tb.compm = ls.adiv.compm[[i]], 
                         gp_facet = "var", 
                         gp_comp = "donor_ethnicity_timepoint",
+                        gp_shape = "pair",
                         value_var = "value",
                         only.sig = T,
                         alpha = 1,
                         label.type = "p.adj") + 
-    labs(title = paste0(i, "\n")) + 
+    labs(title = paste0(i, "\n")) + ylab(paste0(my.cond, "\n")) +  
     theme(plot.title = element_text(size = 12, face = 'bold', colour = 'black'))
   
   print(ls.adiv.gg[[i]] )
@@ -1603,15 +1562,16 @@ ls.adiv.res <- list(
   
 )
 
-
 openxlsx::write.xlsx(x = ls.adiv.res, file = paste0(path.tb.dir, "/diversity/alpha-div-", my.cond, ".xlsx"), rowNames = F)
 
+{
+  png(filename = paste0(path.fg.dir, "/diversity/alpha-div-", my.cond, ".png"), width = 5000 * 1.1, height = 5000 * 4.75, units = "px", res = 1200, type = "cairo")
+  
+  print(wrap_plots(ls.adiv.gg) + plot_layout(ncol = 1))
+  
+  dev.off()
+}
 
-png(filename = paste0(path.fg.dir, "/diversity/alpha-div-", my.cond, ".png"), width = 5000 * 1.1, height = 5000 * 3.5, units = "px", res = 1200, type = "cairo")
-
-print(wrap_plots(ls.adiv.gg) + plot_layout(ncol = 1))
-
-dev.off()
 
 # BEL
 
@@ -1635,17 +1595,20 @@ for (i in ranks) {
     mutate(rank = i) %>% 
     suppressWarnings(); ls.adiv.compm[[i]]
   
+  # BUG: https://github.com/tidyverse/ggplot2/issues/3535
+  
   ls.adiv.gg[[i]] <- 
-    fun.get.boxp.compm2(tb = tmp.adiv, 
+    fun.get.boxp.compm1(tb = tmp.adiv, 
                         tb.compm = ls.adiv.compm[[i]], 
                         gp_facet = "var", 
                         gp_comp = "donor_ethnicity_timepoint",
-                        group_var = "mouse_n",
+                        gp_shape = "pair",
+                        #group_var = "mouse_n",
                         value_var = "value",
                         only.sig = T,
                         alpha = 1,
                         label.type = "p.adj") + 
-    labs(title = paste0(i, "\n")) + 
+    labs(title = paste0(i, "\n")) + ylab(paste0(my.cond, "\n")) +  
     theme(plot.title = element_text(size = 12, face = 'bold', colour = 'black'))
   
   print(ls.adiv.gg[[i]] )
@@ -1661,15 +1624,16 @@ ls.adiv.res <- list(
   
 )
 
-
 openxlsx::write.xlsx(x = ls.adiv.res, file = paste0(path.tb.dir, "/diversity/alpha-div-", my.cond, ".xlsx"), rowNames = F)
 
+{
+  png(filename = paste0(path.fg.dir, "/diversity/alpha-div-", my.cond, ".png"), width = 5000 * 1.1, height = 5000 * 4.75, units = "px", res = 1200, type = "cairo")
+  
+  print(wrap_plots(ls.adiv.gg) + plot_layout(ncol = 1))
+  
+  dev.off()
+}
 
-png(filename = paste0(path.fg.dir, "/diversity/alpha-div-", my.cond, ".png"), width = 5000 * 1.1, height = 5000 * 3.5, units = "px", res = 1200, type = "cairo")
-
-print(wrap_plots(ls.adiv.gg) + plot_layout(ncol = 1))
-
-dev.off()
 
 # YANOM
 
@@ -1694,16 +1658,17 @@ for (i in ranks) {
     suppressWarnings(); ls.adiv.compm[[i]]
   
   ls.adiv.gg[[i]] <- 
-    fun.get.boxp.compm2(tb = tmp.adiv, 
+    fun.get.boxp.compm1(tb = tmp.adiv, 
                         tb.compm = ls.adiv.compm[[i]], 
                         gp_facet = "var", 
                         gp_comp = "donor_ethnicity_timepoint",
-                        group_var = "mouse_n",
+                        gp_shape = "pair",
+                        #group_var = "mouse_n",
                         value_var = "value",
                         only.sig = T,
                         alpha = 1,
                         label.type = "p.adj") + 
-    labs(title = paste0(i, "\n")) + 
+    labs(title = paste0(i, "\n")) + ylab(paste0(my.cond, "\n")) +  
     theme(plot.title = element_text(size = 12, face = 'bold', colour = 'black'))
   
   print(ls.adiv.gg[[i]] )
@@ -1719,15 +1684,16 @@ ls.adiv.res <- list(
   
 )
 
-
 openxlsx::write.xlsx(x = ls.adiv.res, file = paste0(path.tb.dir, "/diversity/alpha-div-", my.cond, ".xlsx"), rowNames = F)
 
+{
+  png(filename = paste0(path.fg.dir, "/diversity/alpha-div-", my.cond, ".png"), width = 5000 * 1.1, height = 5000 * 4.75, units = "px", res = 1200, type = "cairo")
+  
+  print(wrap_plots(ls.adiv.gg) + plot_layout(ncol = 1))
+  
+  dev.off()
+}
 
-png(filename = paste0(path.fg.dir, "/diversity/alpha-div-", my.cond, ".png"), width = 5000 * 1.1, height = 5000 * 3.5, units = "px", res = 1200, type = "cairo")
-
-print(wrap_plots(ls.adiv.gg) + plot_layout(ncol = 1))
-
-dev.off()
 
 rm(list = ls(pattern = "[.]?alpha[.]?"))
 rm(list = ls(pattern = "[.]?adiv[.]?"))
@@ -1735,7 +1701,6 @@ rm(my.cond)
 
 
 ## Beta diversity --------------------------------------------------------------
-
 
 fun.get.beta.div <- function(my.glom.ps) {
   
@@ -1775,9 +1740,9 @@ fun.get.beta.div <- function(my.glom.ps) {
       rownames_to_column("sample_id") %>% 
       merge(., my.metad)
     
-    pcoa.permutations <- with(my.metad, how(nperm = 999, blocks = cage_id))
+    #pcoa.permutations <- with(my.metad, how(nperm = 999, blocks = cage_id))
     
-    pcoa.perma.comp1 <- adonis2(pcoa.dist ~ donor_ethnicity + timepoint, data = my.metad, method = bdiv.indexes[[i]], permutations = pcoa.permutations, seed = 123)
+    pcoa.perma.comp1 <- adonis2(pcoa.dist ~ donor_ethnicity + timepoint, data = my.metad, method = bdiv.indexes[[i]], permutations = 999, seed = 123)
     
     pcoa.perma.df.comp1 <- 
       pcoa.perma.comp1 %>% 
@@ -1788,7 +1753,7 @@ fun.get.beta.div <- function(my.glom.ps) {
              sig = case_when(P <= 0.001 ~ "***", P <= 0.01 ~ "**", P <= 0.05 ~ "*", P <= 0.1 ~ ".", .default = " "))
     
     
-    pcoa.perma.ph.comp1.1 <- pairwiseAdonis::pairwise.adonis2(pcoa.dist ~ donor_ethnicity_timepoint, strata = "cage_id", data = my.metad, p.adjust.m = "fdr", perm = 999)
+    pcoa.perma.ph.comp1.1 <- pairwiseAdonis::pairwise.adonis2(pcoa.dist ~ donor_ethnicity_timepoint, strata = "experiment", data = my.metad, p.adjust.m = "fdr", perm = 999)
     
     pcoa.perma.ph.comp1.1 <- bind_rows(pcoa.perma.ph.comp1.1) %>% 
       select(-parent_call) %>% 
@@ -1800,7 +1765,7 @@ fun.get.beta.div <- function(my.glom.ps) {
       pivot_longer(cols = -c(comparison, tmp), names_to = "component", values_to = "value") %>% 
       pivot_wider(names_from = "tmp", values_from = "value") %>% 
       separate_wider_delim(cols = comparison, delim = "_vs_", names = c("group1", "group2")) %>% 
-      mutate(strata = "cage_id"); pcoa.perma.ph.comp1.1
+      mutate(strata = "experiment"); pcoa.perma.ph.comp1.1
     
     pcoa.perma.ph.comp1.2 <- pairwiseAdonis::pairwise.adonis2(pcoa.dist ~ donor_ethnicity_timepoint, data = my.metad, p.adjust.m = "fdr", perm = 999)
     
@@ -1821,204 +1786,149 @@ fun.get.beta.div <- function(my.glom.ps) {
     # Axes 1:2
     
     ggplot() +
-      # stat_ellipse(data = pcoa.site.score, 
-      #              aes(x = PCoA1, y = PCoA2, fill = donor_ethnicity_timepoint),
-      #              geom = "polygon", linetype = 0, alpha = .25, show.legend = F) +
-      geom_line(pcoa.site.score, mapping = aes(group = mouse_n, x = PCoA1, y = PCoA2), color = "black", alpha = .25, linewidth = .25) +
-      geom_point(pcoa.site.score, mapping = aes(x = PCoA1, y = PCoA2, fill = donor_ethnicity_timepoint), shape = 21, color = "white", size = 3) +
+      stat_ellipse(data = pcoa.site.score,
+                   aes(x = PCoA1, y = PCoA2, color = donor_ethnicity_timepoint, fill = donor_ethnicity_timepoint),
+                   geom = "polygon", linetype = "blank", alpha = .15, show.legend = F, type = "norm") +
+      geom_point(pcoa.site.score, 
+                 mapping = aes(x = PCoA1, y = PCoA2, fill = donor_ethnicity_timepoint, 
+                               color = donor_ethnicity_timepoint, shape = pair), 
+                 size = 2, alpha = 1) +
       annotate("richtext", x = Inf, y = -Inf, size = 2.5,
                label = paste0("PERMANOVA: *R*<sup>2</sup> = ", round(pcoa.perma.df.comp1[1, "R2"], 2), "; *p* = ", ifelse(pcoa.perma.df.comp1[1, "P"] < 0.001, "<0.001", sprintf("%1.3f", round(pcoa.perma.df.comp1[1, "P"], 3)))),
-               fill = NA, label.color = NA, hjust = 1, vjust = 0) +
+               fill = NA, label.color = NA, hjust = 1, vjust = 0, color = "red") +
       geom_vline(xintercept = 0, linewidth = 0.25, linetype = "dotted") +
       geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
       scale_y_continuous(expand = expansion(mult = c(0.25, 0.05))) +
       my.theme.2 +
+      scale_shape_manual(values = shapes.exp) +
+      scale_color_manual(values = colors.gp.tp) +
       scale_fill_manual(values = colors.gp.tp) +
       labs(x = paste0("<br>PCoA1 (", round(pcoa.cmds$eig / sum(pcoa.cmds$eig) * 100, 2)[1], "%)"),
            y = paste0("PCoA2 (", round(pcoa.cmds$eig / sum(pcoa.cmds$eig) * 100, 2)[2], "%)<br>")) + 
       theme(plot.subtitle = element_blank(),
             legend.position = "none",
-            plot.margin = unit(c(0, 0.1, 0.1, 0.1), 'cm')) -> gg.pcoa.axes12
-    
-    gg.pcoa.axes12.param <- ggplot_build(gg.pcoa.axes12)
-    gg.pcoa.axes12.param.ylimits <- gg.pcoa.axes12.param$layout$panel_params[[1]]$y$continuous_range
-    gg.pcoa.axes12.param.xlimits <- gg.pcoa.axes12.param$layout$panel_params[[1]]$x$continuous_range
-    
-    pcoa.site.score.longer.axes12 <- 
-      pcoa.site.score %>% 
-      pivot_longer(cols = c("PCoA1", "PCoA2"), names_to = "PC", values_to = "value") %>% 
-      distinct()
-    
-    pcoa.site.score.summary.axes12 <-
-      pcoa.site.score.longer.axes12 %>% 
-      group_by(donor_ethnicity_timepoint, PC) %>% 
-      summarise(temp = list(c(psych::describe(value), quantile(value, na.rm = T), IQR = EnvStats::iqr(value, na.rm = T)))) %>% 
-      unnest_wider(temp) %>% 
-      select(-c(vars, trimmed, mad)) %>% 
-      mutate(across(where(is.numeric), ~case_when(is.nan(.) ~ NA_integer_, is.infinite(.) ~ NA_integer_,.default = .))) %>% 
-      data.frame(check.names = F) %>% 
-      arrange(PC, donor_ethnicity_timepoint)
-    
-    pcoa.site.score.kruskal.axes12 <- 
-      fun.get.kruskal(tb = pcoa.site.score.longer.axes12, gp_comp = "donor_ethnicity_timepoint", gp_facet = "PC", value_var = "value") %>% 
-      arrange(PC)
-    
-    pcoa.site.score.posthoc.axes12 <- 
-      fun.get.wilcox(tb = pcoa.site.score.longer.axes12, 
-                     tb.stat = pcoa.site.score.kruskal.axes12,
-                     gp_comp = "donor_ethnicity_timepoint", gp_facet = "PC", value_var = "value") %>% 
-      arrange(PC)
-    
-    pcoa.site.score.longer.axes12 %>% 
-      filter(PC == "PCoA1") %>% 
-      ggplot(., aes(x = donor_ethnicity_timepoint, y = value, fill = donor_ethnicity_timepoint, color = donor_ethnicity_timepoint)) +
-      geom_boxplot(width = 0.66, color = "black", outlier.size = 1, outlier.shape = 21, linewidth = 0.25) +
-      geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
-      scale_y_continuous(limits = c(gg.pcoa.axes12.param.xlimits[1], gg.pcoa.axes12.param.xlimits[2]), expand = c(0, 0)) +
-      scale_fill_manual(values = colors.gp.tp) + 
-      coord_flip() + 
-      theme_void() +
-      theme(legend.position = "none",
-            plot.margin = unit(c(0, 0, 0, 0), 'cm')) -> gg.pcoa.pc1.compm.axes12
-    
-    pcoa.site.score.longer.axes12 %>% 
-      filter(PC == "PCoA2") %>% 
-      ggplot(., aes(x = donor_ethnicity_timepoint, y = value, fill = donor_ethnicity_timepoint, color = donor_ethnicity_timepoint)) +
-      geom_boxplot(width = 0.66, color = "black", outlier.size = 1, outlier.shape = 21, linewidth = 0.25) +
-      geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
-      scale_y_continuous(limits = c(gg.pcoa.axes12.param.ylimits[1], gg.pcoa.axes12.param.ylimits[2]), expand = c(0, 0)) +
-      scale_color_manual(values = colors.gp.tp) + 
-      scale_fill_manual(values = colors.gp.tp) + 
-      theme_void() +
-      theme(legend.position = "none",
-            plot.margin = unit(c(0, 0, 0, 0), 'cm')) -> gg.pcoa.pc2.compm.axes12
-    
-    gg.pcoa.axes12.panel <- gg.pcoa.pc1.compm.axes12 + plot_spacer() + gg.pcoa.axes12 + gg.pcoa.pc2.compm.axes12 + plot_layout(ncol = 2, heights = c(.1, 1), widths = c(1, .1))
+            plot.margin = unit(c(0, 0.1, 0.1, 0.1), 'cm')) -> gg.pcoa.axes12; gg.pcoa.axes12
     
     # Axes 1:3
     
     ggplot() +
-      # stat_ellipse(data = pcoa.site.score, 
-      #              aes(x = PCoA1, y = PCoA2, fill = donor_ethnicity_timepoint),
-      #              geom = "polygon", linetype = 0, alpha = .25, show.legend = F) +
-      geom_line(pcoa.site.score, mapping = aes(group = mouse_n, x = PCoA1, y = PCoA3), color = "black", alpha = .25, linewidth = .25) +
-      geom_point(pcoa.site.score, mapping = aes(x = PCoA1, y = PCoA3, fill = donor_ethnicity_timepoint), shape = 21, color = "white", size = 3) +
-      # annotate("richtext", x = Inf, y = -Inf, size = 2.5,
-      #          label = paste0("PERMANOVA: *R*<sup>2</sup> = ", round(pcoa.perma.df.comp1[1, "R2"], 2), "; *p* = ", ifelse(pcoa.perma.df.comp1[1, "P"] < 0.001, "<0.001", sprintf("%1.3f", round(pcoa.perma.df.comp1[1, "P"], 3)))),
-      #          fill = NA, label.color = NA, hjust = 1, vjust = 0) +
+      stat_ellipse(data = pcoa.site.score,
+                   aes(x = PCoA1, y = PCoA3, color = donor_ethnicity_timepoint, fill = donor_ethnicity_timepoint),
+                   geom = "polygon", linetype = "blank", alpha = .15, show.legend = F, type = "norm") +
+      geom_point(pcoa.site.score, 
+                 mapping = aes(x = PCoA1, y = PCoA3, fill = donor_ethnicity_timepoint, 
+                               color = donor_ethnicity_timepoint, shape = pair), 
+                 size = 2, alpha = 1) +
       geom_vline(xintercept = 0, linewidth = 0.25, linetype = "dotted") +
       geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
       scale_y_continuous(expand = expansion(mult = c(0.25, 0.05))) +
       my.theme.2 +
+      scale_shape_manual(values = shapes.exp) +
+      scale_color_manual(values = colors.gp.tp) +
       scale_fill_manual(values = colors.gp.tp) +
       labs(x = paste0("<br>PCoA1 (", round(pcoa.cmds$eig / sum(pcoa.cmds$eig) * 100, 2)[1], "%)"),
            y = paste0("PCoA3 (", round(pcoa.cmds$eig / sum(pcoa.cmds$eig) * 100, 2)[3], "%)<br>")) + 
       theme(plot.subtitle = element_blank(),
             legend.position = "none",
-            plot.margin = unit(c(0, 0.1, 0.1, 0.1), 'cm')) -> gg.pcoa.axes13
+            plot.margin = unit(c(0, 0.1, 0.1, 0.1), 'cm')) -> gg.pcoa.axes13; gg.pcoa.axes13
     
-    gg.pcoa.axes13.param <- ggplot_build(gg.pcoa.axes13)
-    gg.pcoa.axes13.param.ylimits <- gg.pcoa.axes13.param$layout$panel_params[[1]]$y$continuous_range
-    gg.pcoa.axes13.param.xlimits <- gg.pcoa.axes13.param$layout$panel_params[[1]]$x$continuous_range
     
-    pcoa.site.score.longer.axes13 <- 
-      pcoa.site.score %>% 
-      pivot_longer(cols = c("PCoA1", "PCoA3"), names_to = "PC", values_to = "value") %>% 
-      distinct()
+    gg.pcoa.panel <- gg.pcoa.axes12 + gg.pcoa.axes13
     
-    pcoa.site.score.summary.axes13 <-
-      pcoa.site.score.longer.axes13 %>% 
-      group_by(donor_ethnicity_timepoint, PC) %>% 
-      summarise(temp = list(c(psych::describe(value), quantile(value, na.rm = T), IQR = EnvStats::iqr(value, na.rm = T)))) %>% 
-      unnest_wider(temp) %>% 
-      select(-c(vars, trimmed, mad)) %>% 
-      mutate(across(where(is.numeric), ~case_when(is.nan(.) ~ NA_integer_, is.infinite(.) ~ NA_integer_,.default = .))) %>% 
-      data.frame(check.names = F) %>% 
-      arrange(PC, donor_ethnicity_timepoint)
+    {
+      png(filename = paste0(path.fg.dir, "/diversity/beta-div-pcoa-", str_to_lower(bdiv.indexes[[i]]), ".png"), width = 5000 * 1.5, height = 5000 * .75, units = "px", res = 1200, type = "cairo")
+      
+      print(gg.pcoa.panel)
+      
+      dev.off()
+    }
     
-    pcoa.site.score.kruskal.axes13 <- 
-      fun.get.kruskal(tb = pcoa.site.score.longer.axes13, gp_comp = "donor_ethnicity_timepoint", gp_facet = "PC", value_var = "value") %>% 
-      arrange(PC)
-    
-    pcoa.site.score.posthoc.axes13 <- 
-      fun.get.wilcox(tb = pcoa.site.score.longer.axes13, 
-                     tb.stat = pcoa.site.score.kruskal.axes13,
-                     gp_comp = "donor_ethnicity_timepoint", gp_facet = "PC", value_var = "value") %>% 
-      arrange(PC)
-    
-    pcoa.site.score.longer.axes13 %>% 
-      filter(PC == "PCoA1") %>% 
-      ggplot(., aes(x = donor_ethnicity_timepoint, y = value, fill = donor_ethnicity_timepoint, color = donor_ethnicity_timepoint)) +
-      geom_boxplot(width = 0.66, color = "black", outlier.size = 1, outlier.shape = 21, linewidth = 0.25) +
-      geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
-      scale_y_continuous(limits = c(gg.pcoa.axes13.param.xlimits[1], gg.pcoa.axes13.param.xlimits[2]), expand = c(0, 0)) +
-      scale_fill_manual(values = colors.gp.tp) + 
-      coord_flip() + 
-      theme_void() +
-      theme(legend.position = "none",
-            plot.margin = unit(c(0, 0, 0, 0), 'cm')) -> gg.pcoa.pc1.compm.axes13
-    
-    pcoa.site.score.longer.axes13 %>% 
-      filter(PC == "PCoA3") %>% 
-      ggplot(., aes(x = donor_ethnicity_timepoint, y = value, fill = donor_ethnicity_timepoint, color = donor_ethnicity_timepoint)) +
-      geom_boxplot(width = 0.66, color = "black", outlier.size = 1, outlier.shape = 21, linewidth = 0.25) +
-      geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
-      scale_y_continuous(limits = c(gg.pcoa.axes13.param.ylimits[1], gg.pcoa.axes13.param.ylimits[2]), expand = c(0, 0)) +
-      scale_color_manual(values = colors.gp.tp) + 
-      scale_fill_manual(values = colors.gp.tp) + 
-      theme_void() +
-      theme(legend.position = "none",
-            plot.margin = unit(c(0, 0, 0, 0), 'cm')) -> gg.pcoa.pc2.compm.axes13
-    
-    gg.pcoa.axes13.panel <- gg.pcoa.pc1.compm.axes13 + plot_spacer() + gg.pcoa.axes13 + gg.pcoa.pc2.compm.axes13 + plot_layout(ncol = 2, heights = c(.1, 1), widths = c(1, .1))
     
     pcoa.disp.comp2 <- 
-      betadisper(d = pcoa.dist, group = my.metad$donor_ethnicity, type = "centroid")$distances %>% 
+      betadisper(d = pcoa.dist, group = my.metad$donor_ethnicity_timepoint, type = "centroid")$distances %>% 
       data.frame(check.names = F) %>% 
       dplyr::rename("value" = ".") %>% 
       rownames_to_column("sample_id") %>% 
       merge(my.metad, .) %>% 
-      mutate(var = "Within-group\ndispersion")
+      mutate(var = "Within-group dispersion")
     
     pcoa.disp.summary.comp2 <- 
-      fun.get.summary(tb = pcoa.disp.comp2, gp_comp = "donor_ethnicity", gp_facet = "var", value_var = "value")
+      fun.get.summary(tb = pcoa.disp.comp2, gp_comp = "donor_ethnicity_timepoint", gp_facet = "var", value_var = "value")
     
-    # pcoa.disp.kruskal.comp2 <- 
-    #   fun.get.kruskal(tb = pcoa.disp.comp2, gp_comp = "donor_ethnicity", gp_facet = "var", value_var = "value")
-    # 
-    # pcoa.disp.posthoc.comp2 <- 
-    #   fun.get.wilcox(tb = pcoa.disp.comp2, gp_comp = "donor_ethnicity", gp_facet = "var", value_var = "value",
-    #                  p_adjust_method = "fdr", conf_level = 0.95, tb.stat = pcoa.disp.kruskal.comp2, alpha.global = 0.05)
+    pcoa.disp.kruskal.comp2 <-
+      fun.get.kruskal(tb = pcoa.disp.comp2, gp_comp = "donor_ethnicity_timepoint", gp_facet = "var", value_var = "value")
     
-    pcoa.disp.compm.comp2 <-
-      fun.get.wilcox(tb = pcoa.disp.comp2, gp_comp = "donor_ethnicity", gp_facet = "var", value_var = "value",
-                     p_adjust_method = "fdr", conf_level = 0.95, tb.stat = NULL, alpha.global = 0.05)
+    pcoa.disp.posthoc.comp2 <-
+      fun.get.wilcox(tb = pcoa.disp.comp2, gp_comp = "donor_ethnicity_timepoint", gp_facet = "var", value_var = "value",
+                     p_adjust_method = "fdr", conf_level = 0.95, tb.stat = pcoa.disp.kruskal.comp2, alpha.global = 0.05)
     
     gg.pcoa.disp.compm.comp2 <- 
-      fun.get.boxp.compm1(tb = pcoa.disp.comp2, 
-                          tb.compm = pcoa.disp.compm.comp2,
+      fun.get.boxp.compm3(tb = pcoa.disp.comp2, 
+                          #tb.compm = pcoa.disp.compm.comp2,
+                          tb.compm = pcoa.disp.posthoc.comp2,
+                          tb.kruskal = pcoa.disp.kruskal.comp2,
+                          gp_facet = "var", 
+                          gp_comp = "donor_ethnicity_timepoint",
+                          gp_fill = "donor_ethnicity_timepoint",
+                          gp_shape = "pair",
+                          value_var = "value",
+                          only.sig = T, 
+                          alpha = 0.1, 
+                          label.type = "stars") + 
+      ylab(paste0("Within-group dispersion\n")) +  
+      theme(strip.text = element_blank())
+    
+    pcoa.shift.mt <- as.matrix(pcoa.dist)
+    
+    pcoa.shift.vc <- sapply(unique(tb.metad$donor_id), function(x) {
+      
+      pre  <- tb.metad$sample_id[tb.metad$donor_id == x & tb.metad$timepoint == "pre-HFD"]
+      post <- tb.metad$sample_id[tb.metad$donor_id == x & tb.metad$timepoint == "post-HFD"]
+      
+      pcoa.shift.mt[pre, post]
+      
+    })
+    
+    pcoa.shift.dt <- 
+      data.frame("donor_id" = names(pcoa.shift.vc), "value" = unname(pcoa.shift.vc)) %>% 
+      merge(tb.metad %>% select(experiment, donor_id, donor_ethnicity, pair) %>% distinct(), .) %>% 
+      mutate(var = "pre- and post-HFD\ndistance")
+    
+    pcoa.shift.summary.comp2 <- 
+      fun.get.summary(tb = pcoa.shift.dt, gp_comp = "donor_ethnicity", gp_facet = "var", value_var = "value")
+    
+    pcoa.shift.compm.comp2 <-
+      fun.get.wilcox(tb = pcoa.shift.dt, gp_comp = "donor_ethnicity", gp_facet = "var", value_var = "value",
+                     p_adjust_method = "fdr", conf_level = 0.95, tb.stat = NULL, alpha.global = 0.05)
+    
+    gg.pcoa.shift.compm.comp2 <- 
+      fun.get.boxp.compm1(tb = pcoa.shift.dt, 
+                          tb.compm = pcoa.shift.compm.comp2,
                           #tb.compm = pcoa.disp.posthoc.comp2,
                           #tb.kruskal = pcoa.disp.kruskal.comp2,
                           gp_facet = "var", 
                           gp_comp = "donor_ethnicity",
-                          gp_fill = "donor_ethnicity_timepoint",
+                          #gp_fill = "donor_ethnicity_timepoint",
+                          gp_shape = "pair",
                           value_var = "value",
                           only.sig = T,
                           alpha = 1, 
-                          label.type = "p.adj")
+                          label.type = "p.adj") +
+      ylab(paste0("pre- and post-HFD distance\n")) +  
+      theme(strip.text = element_blank())
     
     gg.pcoa.panel <- 
-      gg.pcoa.pc1.compm.axes12 + plot_spacer() + plot_spacer() + gg.pcoa.pc1.compm.axes13 + plot_spacer() + plot_spacer() +
-      gg.pcoa.axes12 + gg.pcoa.pc2.compm.axes12 + plot_spacer() + gg.pcoa.axes13 + gg.pcoa.pc2.compm.axes13 + gg.pcoa.disp.compm.comp2 + plot_layout(ncol = 6, heights = c(.1, 1), widths = c(1, .1, .05, 1, .1, .5))
+      gg.pcoa.disp.compm.comp2 + gg.pcoa.shift.compm.comp2 + 
+      plot_layout(nrow = 1, widths = c(65, 35))
     
-    print(gg.pcoa.panel)
-    
-    #Saving graphs
-    png(filename = paste0(path.fg.dir, "/diversity/beta-div-", str_to_lower(bdiv.indexes[[i]]), ".png"), width = 5000 * 2.25, height = 5000 * 1, units = "px", res = 1200, type = "cairo")
-    
-    print(gg.pcoa.panel)
-    
-    dev.off()
+    {
+      png(filename = paste0(path.fg.dir, "/diversity/beta-div-disp-", str_to_lower(bdiv.indexes[[i]]), ".png"), width = 5000 * 1.05, height = 5000 * .8, units = "px", res = 1200, type = "cairo")
+      
+      print(gg.pcoa.panel)
+      
+      dev.off()
+      
+      }
     
     ls.pcoa <-
       
@@ -2027,13 +1937,14 @@ fun.get.beta.div <- function(my.glom.ps) {
         
         "PERMANOVA (post-hoc)" = pcoa.perma.ph,
         
-        "PC1 (Summary)" = pcoa.site.score.posthoc.axes12 %>% filter(PC == "PCoA1"),
-        "PC2 (Summary)" = pcoa.site.score.posthoc.axes12 %>% filter(PC == "PCoA2"),
-        "PC3 (Summary)" = pcoa.site.score.posthoc.axes13 %>% filter(PC == "PCoA3"),
-        
         "Dispersion (Measures)" = pcoa.disp.comp2,
         "Dispersion (Summary)" = pcoa.disp.summary.comp2,
-        "Dispersion (Wilcox)" = pcoa.disp.compm.comp2
+        "Dispersion (Kruskal)" = pcoa.disp.kruskal.comp2,
+        "Dispersion (post-hoc)" = pcoa.disp.posthoc.comp2,
+        
+        "pre-post dist (Measures)" = pcoa.shift.dt,
+        "pre-post dist (Summary)" = pcoa.shift.summary.comp2,
+        "pre-post dist (Wilcox)" = pcoa.shift.compm.comp2
         
       )
     
@@ -2043,15 +1954,10 @@ fun.get.beta.div <- function(my.glom.ps) {
   
 }
 
-bdiv.indexes <- c("bray", "jaccard")
-names(bdiv.indexes) <- c("Bray—Curtis", "Jaccard")
+bdiv.indexes <- c("bray")
+names(bdiv.indexes) <- c("Bray—Curtis")
 
 fun.get.beta.div(ps.table)
-
-bdiv.indexes <- c("euclidean")
-names(bdiv.indexes) <- c("Euclidean")
-
-fun.get.beta.div(microbiome::transform(ps.table, "clr"))
 
 rm(list = ls(pattern = "[.]?beta[.]?"))
 rm(list = ls(pattern = "[.]?bdiv[.]?"))
@@ -2168,112 +2074,6 @@ df.msl <- list("Raw" = df.msl.raw, "Filtered" = df.msl.filt)
 
 openxlsx::write.xlsx(x = df.msl, file = paste0(path.tb.dir, "/diff_abund/maaslin.xlsx"), rowNames = F)
 
-# Graph: Lollipop
-
-for (i in c(1:4)) {
-  
-  ls.gg.msl <- list()
-  ls.hei.msl <- list()
-  
-  for (r in ranks[1:5]) {
-    
-    df.msl.filt %>% 
-      filter(comp == unique(.$comp)[[i]]) %>% 
-      filter(rank == r) %>% 
-      arrange(desc(enrich_group), abs(coef)) %>% 
-      mutate(tmp = str_remove(comp, "\\|.*")) %>% 
-      mutate(my.xpos = ifelse(enrich_group == tmp, 0.3, -0.3)) %>% 
-      mutate(my.hjust = ifelse(enrich_group == tmp, 0, 1)) %>% 
-      select(-tmp) %>% 
-      data.frame(check.names = F) %>% 
-      arrange(desc(enrich_group), abs(coef)) %>% 
-      mutate(feature = str_remove(feature, "^.*: ")) %>% 
-      mutate(feature = make.unique(feature)) %>% 
-      mutate(feature = factor(feature, levels = unique(feature))) -> tmp.tb.msl.gg
-    
-    if (nrow(tmp.tb.msl.gg) > 0) {
-      
-      ls.hei.msl[[r]][[i]] <- tmp.tb.msl.gg %>% nrow()
-      
-      tmp.gg.dual.1 <- 
-        ggplot(tmp.tb.msl.gg, aes(x = coef, y = feature, fill = enrich_group)) + 
-        geom_vline(xintercept = 0, color = "gray10", linetype = "solid", linewidth = .25) +
-        geom_segment(aes(x = 0, y = feature, yend = feature, xend = coef), color = "gray75", size = 2, alpha = .5) +
-        geom_errorbar(aes(xmin = coef - stderr, xmax = coef + stderr), width = .25,linewidth = .25) + 
-        geom_point(shape = 21, size = 2, stroke = 0.25) + 
-        scale_x_continuous(expand = expansion(mult = c(0.05, 0.05)), limits = ~ c(-1.05, 1.05) * max(abs(tmp.tb.msl.gg$coef)+abs(tmp.tb.msl.gg$stderr), na.rm = T)) +
-        scale_y_discrete(expand = expansion(mult = 0, add = .5), labels = function(x) str_replace(x, "\\]\\..*$", "]")) +
-        scale_fill_manual(name = "", values = c(colors.gp.tp)) +  
-        coord_cartesian(clip = "off") +
-        labs(title = paste0("<br>", r)) + xlab("<br>MaAsLin (β) coefficient") + ylab("<br>") +
-        my.theme.2 +
-        theme(panel.grid.major.x = element_line(size = 0.25, linetype = 'solid', colour = "gray75"),
-              panel.grid.major.y = element_line(size = 0.25, linetype = 'dotted', colour = "gray75"),
-              axis.text.y = element_markdown(size = 7, colour = 'black'),
-              strip.text.y = element_blank(),
-              plot.margin = unit(c(0, 0, 0, .5), 'cm'))
-      
-      tmp.gg.dual.2 <- 
-        ggplot(tmp.tb.msl.gg, aes(x = 1, y = feature, fill = Phylum2)) +
-        geom_col() + 
-        scale_y_discrete(expand = expansion(mult = c(0.01, 0.01))) +
-        scale_x_continuous(expand = expansion(mult = c(0, 0))) +
-        scale_fill_manual(name = "", values = colors.tax) +  
-        scale_color_identity(name = "") +  
-        xlab("") + ylab("") + 
-        my.theme.2 + 
-        theme(panel.border = element_rect(colour = "#00000000", fill = NA),
-              
-              strip.text.y = element_blank(),
-              axis.line.y = element_blank(),
-              axis.text.y = element_blank(),
-              axis.ticks.y = element_blank(),
-              
-              axis.line.x = element_line(color = "#00000000"),
-              axis.text.x = element_markdown(size = 6, colour = '#00000000'),
-              axis.ticks.x = element_line(color = "#00000000"),
-              
-              plot.margin = unit(c(0, .5, 0, -.5), 'cm'))
-      
-      if (nrow(tmp.tb.msl.gg) > 15) {
-        
-        ls.gg.msl[[r]][[i]] <- tmp.gg.dual.1 + tmp.gg.dual.2 + gg.leg.tax + plot_layout(nrow = 1, widths = c(.75, .04, 2.5))
-        
-      } else {
-        
-        ls.gg.msl[[r]][[i]] <- tmp.gg.dual.1 + tmp.gg.dual.2 + (plot_spacer() + theme_void()) + plot_layout(nrow = 1, widths = c(.75, .04, 2.5))
-        
-      }
-      
-    }
-    
-  }
-  
-  if (length(ls.hei.msl) > 0 & sum(unlist(ls.hei.msl)) < 50) {
-    
-    png(filename = paste0(path.fg.dir, "/diff_abund/maaslin-comp", i, ".png"), width = 5000 * 1.75, height = 220 * sum(unlist(ls.hei.msl)), units = "px", res = 1200, type = "cairo")
-    
-    print(wrap_plots(unlist(ls.gg.msl)) + plot_layout(ncol = 1, heights = c(unlist(ls.hei.msl))))
-    
-    dev.off()
-    
-  }
-  
-  if (length(ls.hei.msl) > 0 & sum(unlist(ls.hei.msl)) > 50) {
-    
-    png(filename = paste0(path.fg.dir, "/diff_abund/maaslin-comp", i, ".png"), width = 5000 * 1.75, height = 170 * sum(unlist(ls.hei.msl)), units = "px", res = 1200, type = "cairo")
-    
-    print(wrap_plots(unlist(ls.gg.msl)) + plot_layout(ncol = 1, heights = c(unlist(ls.hei.msl))))
-    
-    dev.off()
-    
-  }
-  
-}
-
-rm(i, r)
-rm(list = ls(pattern = "[.]?tmp[.]?"))
-
 # Graph: Volcano Plot
 
 for (i in c(1:4)) {
@@ -2301,19 +2101,16 @@ for (i in c(1:4)) {
     tmp.gg.vp <-
       tmp.tb.msl.gg %>%
       filter(!is.na(coef)) %>% 
-      ggplot(., aes(x = ifelse(coef > 0, sqrt(coef), -sqrt(abs(coef))), y = -log10(qval), fill = sig)) + 
-      geom_hline(yintercept = -log10(0.05), color = c("gray75"), linetype = "dashed", linewidth = .25) + 
-      geom_vline(xintercept = c(-1, 1), color = c("gray75"), linetype = "dashed", linewidth = .25) +
-      geom_text_repel(aes(label = my.label, nudge_x = my.nudge.x, hjust = my.hjust,  color = sig),
-                      direction = "y", size = 2, segment.alpha = .15, segment.color = 'black',
+      ggplot(., aes(x = coef, y = -log10(qval), fill = sig)) + 
+      geom_text_repel(aes(label = my.label, nudge_x = my.nudge.x, hjust = my.hjust, color = sig),
+                      direction = "y", size = 2, segment.alpha = .5, segment.color = 'black', segment.size = 0.25,
                       min.segment.length = 0.2, max.overlaps = 999, force = 20, force_pull = 0.5, seed = 123) +
       geom_point(shape = 21, alpha = 1, size = 2, color = "white") + 
-      ylab("-log<sub>10</sub> (adjusted <i>p</i>-value)<br>") +
+      geom_hline(yintercept = -log10(0.05), color = c("black"), linetype = "dotted", linewidth = .25) + 
+      geom_vline(xintercept = c(-1, 1), color = c("black"), linetype = "dotted", linewidth = .25) +
+      ylab("-log<sub>10</sub> (<i>q</i>-value)<br>") +
       xlab("<br>MaAsLin (β) coefficient") +
-      scale_x_continuous(limits = ~ c(-2, 2) * max(abs(.x))) + 
-      scale_y_continuous(expand = expansion(mult = c(.15, .5)), 
-                         trans = "sqrt", 
-                         breaks = c(0, 1, 2, 3, 4, 5)^2) +
+      scale_x_continuous(limits = ~ c(-1.5, 1.5) * max(abs(.x))) + 
       scale_fill_manual(name = "Group", values = c(colors.gp.tp, "Not Sig." = "gray75")) +
       scale_color_manual(values = c(colors.gp.tp)) +
       coord_cartesian(clip = "off") +
@@ -2338,6 +2135,8 @@ rm(list = ls(pattern = "[.]?tmp[.]?"))
 
 fun.get.heatmap.clr.z <- function(my.msl.table, my.rank, my.top) {
   
+  my.metad <- tb.metad %>% arrange(donor_ethnicity_timepoint)
+  
   top.taxa <- 
     my.msl.table %>% 
     filter(rank == my.rank) %>% 
@@ -2354,12 +2153,12 @@ fun.get.heatmap.clr.z <- function(my.msl.table, my.rank, my.top) {
   
   tmp.tb.clr <-
     merge(tax_table(tmp.ps.clr), otu_table(tmp.ps.clr), by = "row.names", all = T) %>% 
-    select(feature = my.rank, any_of(tb.metad$sample_id)) %>% 
+    select(feature = my.rank, any_of(my.metad$sample_id)) %>% 
     merge(., my.msl.table %>% select(Phylum, Phylum2, feature), all.x = T) %>% 
     distinct()
   
   hp.anno.col <-
-    tb.metad %>% 
+    my.metad %>% 
     column_to_rownames("sample_id") %>% 
     select(donor_ethnicity_timepoint, mouse_n)
   
@@ -2370,7 +2169,7 @@ fun.get.heatmap.clr.z <- function(my.msl.table, my.rank, my.top) {
   
   hp.values <- 
     tmp.tb.clr %>% 
-    select(feature, any_of(tb.metad$sample_id)) %>% 
+    select(feature, any_of(my.metad$sample_id)) %>% 
     column_to_rownames("feature") %>%
     t() %>% 
     scale() %>% 
@@ -2396,10 +2195,15 @@ fun.get.heatmap.clr.z <- function(my.msl.table, my.rank, my.top) {
   
   hp.b <- 
     ComplexHeatmap::columnAnnotation(
+      
       `Condition` = 
         hp.anno.col$donor_ethnicity_timepoint,
+      
       col = 
-        list(`Condition` = colors.gp.tp),
+        list(
+          `Experiment` = colors.exp,
+          `Condition` = colors.gp.tp 
+        ),
       show_annotation_name = FALSE,
       simple_anno_size = unit(.25, "cm"),
       show_legend = TRUE)
@@ -2411,9 +2215,11 @@ fun.get.heatmap.clr.z <- function(my.msl.table, my.rank, my.top) {
                           cluster_rows = T, 
                           cluster_columns = F,
                           row_names_gp = gpar(fontsize = 9),
+                          column_names_gp = gpar(fontsize = 9),
                           column_title = str_glue("Top {nrow(hp.values)} most variable taxa at {my.rank} level\nStandardized CLR-transformed data (CLR-Z)"), 
-                          column_title_gp = gpar(fontsize = 12, fontface = "bold"),
-                          show_column_names = F,
+                          column_title_gp = gpar(fontsize = 12),
+                          column_labels = my.metad$mouse_n,
+                          show_column_names = T,
                           heatmap_legend_param = 
                             list(color_bar = "continuous",
                                  ncol = 1,
@@ -2421,12 +2227,42 @@ fun.get.heatmap.clr.z <- function(my.msl.table, my.rank, my.top) {
                                  legend_height = unit(3, "cm"),
                                  grid_width = unit(.25, "cm"),
                                  title_position = "leftcenter-rot",
-                                 title_gp = gpar(fontsize = 10, fontface="bold"),
+                                 title_gp = gpar(fontsize = 10),
                                  labels_gp = gpar(fontsize = 8)), 
                           left_annotation = hp.a,
                           top_annotation = hp.b) -> hp.plot
   
-  png(filename = paste0(path.fg.dir, "/diff_abund/heatmap-clr-z_", str_to_lower(my.rank),".png"), width = 5000 * 2, height = 5000 * (.9 + (nrow(hp.values)/60)), units = "px", res = 1200, type = "cairo")
+  png(filename = paste0(path.fg.dir, "/diff_abund/heatmap-clr-z_", str_to_lower(my.rank),".png"), width = 5000 * 2.25, height = 5000 * (1 + (nrow(hp.values)/60)), units = "px", res = 1200, type = "cairo")
+  
+  draw(hp.plot, merge_legend = TRUE, heatmap_legend_side = "left", annotation_legend_side = "left", padding = unit(c(1, 10, 1, 50), "mm"))
+  
+  dev.off()
+  
+  # Plot Col
+  ComplexHeatmap::Heatmap(hp.values, 
+                          name = "CLR-Z",  
+                          col = hp.col.fun.1,
+                          cluster_rows = T, 
+                          cluster_columns = T,
+                          row_names_gp = gpar(fontsize = 9),
+                          column_names_gp = gpar(fontsize = 9),
+                          column_title = str_glue("Top {nrow(hp.values)} most variable taxa at {my.rank} level\nStandardized CLR-transformed data (CLR-Z)"), 
+                          column_title_gp = gpar(fontsize = 12),
+                          column_labels = my.metad$mouse_n,
+                          show_column_names = T,
+                          heatmap_legend_param = 
+                            list(color_bar = "continuous",
+                                 ncol = 1,
+                                 legend_direction = "vertical", 
+                                 legend_height = unit(3, "cm"),
+                                 grid_width = unit(.25, "cm"),
+                                 title_position = "leftcenter-rot",
+                                 title_gp = gpar(fontsize = 10),
+                                 labels_gp = gpar(fontsize = 8)), 
+                          left_annotation = hp.a,
+                          top_annotation = hp.b) -> hp.plot
+  
+  png(filename = paste0(path.fg.dir, "/diff_abund/heatmap2-clr-z_", str_to_lower(my.rank),".png"), width = 5000 * 2.25, height = 5000 * (1.2 + (nrow(hp.values)/60)), units = "px", res = 1200, type = "cairo")
   
   draw(hp.plot, merge_legend = TRUE, heatmap_legend_side = "left", annotation_legend_side = "left", padding = unit(c(1, 10, 1, 50), "mm"))
   
@@ -2435,10 +2271,12 @@ fun.get.heatmap.clr.z <- function(my.msl.table, my.rank, my.top) {
 }
 
 fun.get.heatmap.clr.z(df.msl.raw, "Genus", 50)
-fun.get.heatmap.clr.z(df.msl.raw, "Family", 25)
+fun.get.heatmap.clr.z(df.msl.raw, "Family", 30)
 
 graphics.off()
 gc()
+
+save.image(paste0(path.wk.dir, "/", my.exp,  "/tax-profiler_v3.RData"))
 
 
 # End ---------------------------------------------------------------------

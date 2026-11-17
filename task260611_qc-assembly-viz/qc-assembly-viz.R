@@ -20,7 +20,7 @@ library("tidyverse")
 library("openxlsx")
 
 getwd()
-setwd("~/YanomamiMouseHFD/")
+setwd("~/Mouse-HFD-WMS/")
 getwd()
 
 list.dirs()

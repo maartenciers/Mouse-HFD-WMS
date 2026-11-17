@@ -33,7 +33,7 @@ library("Maaslin2")
 library("tidyverse")
 
 getwd()
-setwd("~/YanomamiMouseHFD/")
+setwd("~/Mouse-HFD-WMS/")
 getwd()
 
 list.dirs()
@@ -47,7 +47,7 @@ for (i in c(path.wk.dir)) {
   
 }; remove(i)
 
-my.exp <- "HFD1"
+my.exp <- "HFD2"
 
 path.fg.dir <- paste0(path.wk.dir, "/", my.exp ,"/figures")
 path.tb.dir <- paste0(path.wk.dir, "/", my.exp,  "/tables")
@@ -324,162 +324,6 @@ fun.upper.whisker <- function(x) {
   boxplot.stats(x)$stats[5]
 }
 
-fun.get.boxp.compm1 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = NULL,
-                                gp_facet, value_var, only.sig = F, alpha = 0.1, 
-                                label.type = "stars") {
-  
-  if (is.null(gp_fill)) { gp_fill = gp_comp }
-  if (is.null(gp_col)) { gp_col = gp_comp }
-  
-  tb.brackets <- fun.get.brackets(
-    tb = tb,
-    tb.compm = tb.compm,
-    gp_facet = gp_facet,
-    gp_comp = gp_comp,
-    value_var = value_var,
-    only.sig = only.sig,
-    alpha = alpha,
-    label.type = label.type
-  )
-  
-  if (nrow(tb.brackets) > 0) {
-    
-    gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
-                         fill = .data[[gp_fill]], color = .data[[gp_col]])) +
-      facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-      geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-      geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
-      ggpubr::stat_pvalue_manual(
-        tb.brackets,
-        vjust = -1,
-        xmin = "group1",
-        xmax = "group2",
-        y.position = "y.position",
-        label = "label",
-        tip.length = 0.01,
-        bracket.size = 0.25,
-        size = 2.5,
-        hide.ns = only.sig,
-        inherit.aes = FALSE
-      ) +
-      scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
-      coord_cartesian(clip = "off") +
-      ylab("") + xlab("") +
-      my.theme.1 + 
-      theme(legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
-    
-    return(gg)
-    
-  }
-  
-  gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
-                       fill = .data[[gp_fill]], color = .data[[gp_col]])) +
-    facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-    geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-    geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
-    scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
-    coord_cartesian(clip = "off") +
-    ylab("") + xlab("") +
-    my.theme.1 + 
-    theme(legend.position = "none",
-          legend.title = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
-  
-  return(gg)
-  
-}
-
-
-fun.get.boxp.compm2 <- function(tb, tb.compm, gp_comp, gp_fill = NULL, gp_col = NULL,
-                                gp_facet, group_var, value_var, only.sig = F, alpha = 0.1, 
-                                label.type = "stars") {
-  
-  if (is.null(gp_fill)) { gp_fill = gp_comp }
-  if (is.null(gp_col)) { gp_col = gp_comp }
-  
-  tb.brackets <- fun.get.brackets(
-    tb = tb,
-    tb.compm = tb.compm,
-    gp_facet = gp_facet,
-    gp_comp = gp_comp,
-    value_var = value_var,
-    only.sig = only.sig,
-    alpha = alpha,
-    label.type = label.type
-  )
-  
-  if (nrow(tb.brackets) > 0) {
-    
-    gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
-                         fill = .data[[gp_fill]], color = .data[[gp_col]])) +
-      facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-      geom_line(aes(group = .data[[group_var]]), color = "black", alpha = .25, linewidth = .25, 
-                position = position_jitter(w = 0.1, h = 0, seed = 123)) +
-      geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-      geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
-      ggpubr::stat_pvalue_manual(
-        tb.brackets,
-        vjust = -1,
-        xmin = "group1",
-        xmax = "group2",
-        y.position = "y.position",
-        label = "label",
-        tip.length = 0.01,
-        bracket.size = 0.25,
-        size = 2.5,
-        hide.ns = only.sig,
-        inherit.aes = FALSE
-      ) +
-      scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
-      coord_cartesian(clip = "off") +
-      ylab("") + xlab("") +
-      my.theme.1 + 
-      theme(legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
-    
-    return(gg)
-    
-  }
-  
-  gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
-                       fill = .data[[gp_fill]], color = .data[[gp_col]])) +
-    facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-    geom_line(aes(group = .data[[group_var]]), color = "black", alpha = .25, linewidth = .25, 
-              position = position_jitter(w = 0.1, h = 0, seed = 123)) +
-    geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
-    geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
-    scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
-    coord_cartesian(clip = "off") +
-    ylab("") + xlab("") +
-    my.theme.1 + 
-    theme(legend.position = "none",
-          legend.title = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
-  
-  return(gg)
-  
-}
-
-
 fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NULL, gp_col = NULL, 
                                 gp_shape = NULL, gp_facet, value_var,
                                 only.sig = F, alpha = 0.1, label.type = "stars", step.mult = 0.08) {
@@ -496,7 +340,7 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
     only.sig = only.sig,
     alpha = alpha,
     label.type = label.type,
-    step.mult = step.mult
+    step.mult = 0.15
   )
   
   tb.global <- tb.kruskal %>%
@@ -512,7 +356,7 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
     gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                          fill = .data[[gp_fill]], color = .data[[gp_col]])) +
       facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-      geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+      geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
       {if(is.null(gp_shape)) geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123))} +
       {if(!is.null(gp_shape)) geom_point(aes(shape = .data[[gp_shape]]), size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123))} +
       {if(!is.null(gp_shape)) scale_shape_manual(values = shapes.exp)} +
@@ -522,7 +366,7 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
         inherit.aes = FALSE,
         vjust = 2,
         hjust = 0,
-        size = 2,
+        size = 2.75,
         color = "black"
       ) +
       ggpubr::stat_pvalue_manual(
@@ -533,21 +377,19 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
         label = "label",
         tip.length = 0.01,
         bracket.size = 0.25,
-        size = 2.5,
+        size = 2.75,
         hide.ns = only.sig,
         inherit.aes = FALSE
       ) +
       scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
       scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-      scale_y_continuous(expand = expansion(mult = c(0.1, 0.35))) +
+      scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
       coord_cartesian(clip = "off") +
       ylab("") + xlab("") +
       my.theme.1 + 
       theme(legend.position = "none",
-            legend.title = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+            panel.spacing = unit(1, "cm"), 
+            axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
     
     return(gg)
     
@@ -557,7 +399,7 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
   gg <- ggplot(tb, aes(x = .data[[gp_comp]], y = .data[[value_var]],
                        fill = .data[[gp_fill]], color = .data[[gp_col]])) +
     facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-    geom_boxplot(width = .45, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
+    geom_boxplot(width = .65, alpha = .35, outlier.shape = NA, linewidth = 0.25) +
     {if(is.null(gp_shape)) geom_point(shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123))} +
     {if(!is.null(gp_shape)) geom_point(aes(shape = .data[[gp_shape]]), size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123))} +
     {if(!is.null(gp_shape)) scale_shape_manual(values = shapes.exp)} +
@@ -567,148 +409,23 @@ fun.get.boxp.compm3 <- function(tb, tb.compm, tb.kruskal, gp_comp,  gp_fill = NU
       inherit.aes = FALSE,
       vjust = 2,
       hjust = 0,
-      size = 2,
+      size = 2.75,
       color = "black"
     ) +
     
     scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
     scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-    scale_y_continuous(expand = expansion(mult = c(0.1, 0.35))) +
+    scale_y_continuous(expand = expansion(mult = c(0.1, 0.25))) +
     coord_cartesian(clip = "off") +
     ylab("") + xlab("") +
     my.theme.1 + 
     theme(legend.position = "none",
-          legend.title = element_blank(),
-          axis.text.x = element_blank(),
-          axis.ticks.x = element_blank(),
-          plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
+          panel.spacing = unit(1, "cm"), 
+          axis.text.x = element_text(size = 8, colour = 'black', angle = 45, hjust = 1, vjust = 1))
   
   return(gg)
   
 }
-
-
-# fun.get.barp.compm3 <- function(tb, tb.compm, tb.kruskal, tb.summ, gp_comp,  gp_fill = NULL, gp_col = NULL,
-#                                 gp_facet, value_var,
-#                                 only.sig = F, alpha = 0.1, label.type = "stars") {
-#   
-#   if (is.null(gp_fill)) { gp_fill = gp_comp }
-#   if (is.null(gp_col)) { gp_col = gp_comp }
-#   
-#   tb.brackets <- fun.get.brackets(
-#     tb = tb,
-#     tb.compm = tb.compm,
-#     gp_facet = gp_facet,
-#     gp_comp = gp_comp,
-#     value_var = value_var,
-#     only.sig = only.sig,
-#     alpha = alpha,
-#     label.type = label.type,
-#     step.mult = .5
-#   )
-#   
-#   tb.global <- tb.kruskal %>%
-#     mutate(
-#       p.full = paste0(
-#         "KW, 𝘱-adj: ",
-#         ifelse(adj.p.value < 0.001, "<0.001", sprintf("%1.3f", round(adj.p.value, 3)))
-#       )
-#     )
-#   
-#   if (nrow(tb.brackets) > 0) {
-#     
-#     gg <- ggplot() +
-#       facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-#       
-#       geom_bar(data = tb.summ, mapping = aes(x = .data[[gp_comp]], y = .data[["mean"]],
-#                                    fill = .data[[gp_fill]], color = .data[[gp_col]]),
-#                stat="identity", alpha = .35, position=position_dodge()) +
-#       # geom_errorbar(data = tb.summ, 
-#       #               mapping = aes(x = .data[[gp_comp]],
-#       #                             ymin=.data[["mean"]]-.data[["sd"]], ymax=.data[["mean"]]+.data[["sd"]]), 
-#       #               width=.2, position=position_dodge(.9)) + 
-#     
-#       geom_point(tb, mapping = aes(x = .data[[gp_comp]], y = .data[[value_var]],
-#                          fill = .data[[gp_fill]], color = .data[[gp_col]]),
-#                  shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
-#       geom_text(
-#         data = tb.global,
-#         aes(x = 0.5, y = Inf, label = p.full),
-#         inherit.aes = FALSE,
-#         vjust = 2,
-#         hjust = 0,
-#         size = 2,
-#         color = "black"
-#       ) +
-#       ggpubr::stat_pvalue_manual(
-#         tb.brackets,
-#         xmin = "group1",
-#         xmax = "group2",
-#         y.position = "y.position",
-#         label = "label",
-#         tip.length = 0.01,
-#         bracket.size = 0.25,
-#         size = 2.5,
-#         hide.ns = only.sig,
-#         inherit.aes = FALSE
-#       ) +
-#       scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
-#       scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-#       scale_y_continuous(expand = expansion(mult = c(0.1, 0.35))) +
-#       coord_cartesian(clip = "off") +
-#       ylab("") + xlab("") +
-#       my.theme.1 + 
-#       theme(legend.position = "none",
-#             legend.title = element_blank(),
-#             axis.text.x = element_blank(),
-#             axis.ticks.x = element_blank(),
-#             plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
-#     
-#     return(gg)
-#     
-#   }
-#   
-#   
-#   gg <- ggplot() +
-#     facet_wrap(stats::as.formula(paste("~", gp_facet)), scales = "free_y", nrow = 1) +
-#     
-#     geom_bar(data = tb.summ, mapping = aes(x = .data[[gp_comp]], y = .data[["mean"]],
-#                                  fill = .data[[gp_fill]], color = .data[[gp_col]]),
-#              stat="identity", alpha = .35, position=position_dodge()) +
-#     # geom_errorbar(data = tb.summ, 
-#     #               mapping = aes(x = .data[[gp_comp]], 
-#     #                             ymin=.data[["mean"]]-.data[["sd"]], ymax=.data[["mean"]]+.data[["sd"]]), 
-#     #               width=.2, position=position_dodge(.9)) + 
-#     
-#     geom_point(data = tb, mapping = aes(x = .data[[gp_comp]], y = .data[[value_var]],
-#                        fill = .data[[gp_fill]], color = .data[[gp_col]]),
-#                shape = 16, size = 1, position = position_jitter(w = 0.1, h = 0, seed = 123)) +  
-#     geom_text(
-#       data = tb.global,
-#       aes(x = 0.5, y = Inf, label = p.full),
-#       inherit.aes = FALSE,
-#       vjust = 2,
-#       hjust = 0,
-#       size = 2,
-#       color = "black"
-#     ) +
-#     
-#     scale_fill_manual(values = c(colors.gp, colors.gp.tp)) +  
-#     scale_color_manual(values = c(colors.gp, colors.gp.tp)) +  
-#     scale_y_continuous(expand = expansion(mult = c(0.1, 0.35))) +
-#     coord_cartesian(clip = "off") +
-#     ylab("") + xlab("") +
-#     my.theme.1 + 
-#     theme(legend.position = "none",
-#           legend.title = element_blank(),
-#           axis.text.x = element_blank(),
-#           axis.ticks.x = element_blank(),
-#           plot.margin = unit(c(0.1, 0.1, 0.1, 0.1), 'cm'))
-#   
-#   return(gg)
-#   
-# }
-
 
 
 ## Data loading ----------------------------------------------------------------
@@ -907,25 +624,26 @@ my.theme.1 <-
         legend.title = element_blank(),
         legend.justification = c(0.5, 0.5),
         
-        strip.text = element_text(size = 10, colour = 'black', face = "bold"),
+        strip.text = element_text(size = 10, colour = 'black'),
         strip.background = element_rect(fill = NA, colour = NA),
+        strip.clip = "off",
         
         panel.background = element_rect(fill = "white"),
         panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
-        panel.border = element_rect(color = "black", linewidth = 0, fill = NA),
+        panel.border = element_blank(),
+        panel.spacing = unit(.1, "lines"),
         
         axis.ticks = element_line(color = "black", linewidth = .25),
-        axis.ticks.length = unit(1, "pt"),
+        axis.ticks.length = unit(2.5, "pt"),
         
         axis.line.x = element_line(colour = 'black', linewidth = 0.25),
         axis.line.y = element_line(colour = 'black', linewidth = 0.25),
         axis.title.x = element_text(size = 10, colour = 'black'),
         axis.title.y = element_text(size = 10, colour = 'black'),
         axis.title.y.right = element_text(size = 10, colour = 'black'),
-        axis.text.x = element_text(size = 7, colour = 'black'),
-        axis.text.y = element_text(size = 7, colour = 'black'),
-        
+        axis.text.x = element_text(size = 8, colour = 'black'),
+        axis.text.y = element_text(size = 8, colour = 'black'),
         plot.title = element_text(size = 10, face = 'bold', colour = 'black'),
         plot.subtitle = element_text(size = 6, colour = 'black'),
         plot.margin = unit(c(0.5, 0.75, 0.5, 0.75), 'cm'))
@@ -937,24 +655,26 @@ my.theme.2 <-
         legend.title = element_blank(),
         legend.justification = c(0.5, 0.5),
         
-        strip.text = element_markdown(size = 10, colour = 'black', face = "bold"),
+        strip.text = element_markdown(size = 10, colour = 'black'),
         strip.background = element_rect(fill = NA, colour = NA),
+        strip.clip = "off",
         
         panel.background = element_rect(fill = "white"),
         panel.grid.minor = element_blank(),
         panel.grid.major = element_blank(),
-        panel.border = element_rect(color = "black", linewidth = 0, fill = NA),
+        panel.border = element_blank(),
+        panel.spacing = unit(.1, "lines"),
         
         axis.ticks = element_line(color = "black", linewidth = .25),
-        axis.ticks.length = unit(1, "pt"),
+        axis.ticks.length = unit(2.5, "pt"),
         
         axis.line.x = element_line(colour = 'black', linewidth = 0.25),
         axis.line.y = element_line(colour = 'black', linewidth = 0.25),
         axis.title.x = element_markdown(size = 10, colour = 'black'),
         axis.title.y = element_markdown(size = 10, colour = 'black'),
         axis.title.y.right = element_markdown(size = 10, colour = 'black'),
-        axis.text.x = element_markdown(size = 7, colour = 'black'),
-        axis.text.y = element_markdown(size = 7, colour = 'black'),
+        axis.text.x = element_markdown(size = 8, colour = 'black'),
+        axis.text.y = element_markdown(size = 8, colour = 'black'),
         
         plot.title = element_markdown(size = 10, face = 'bold', colour = 'black'),
         plot.subtitle = element_markdown(size = 6, colour = 'black'),
@@ -967,7 +687,6 @@ names(colors.gp) <- levels(tb.metad$donor_ethnicity)
 
 colors.gp.tp <- c("#FFA500FF", "#FF5500FF", "#0072B2FF", "#2F00B2FF")
 names(colors.gp.tp) <- levels(tb.metad$donor_ethnicity_timepoint)
-
 
 colors.tax <- c("#B06888FF", "#5080C8FF", "#E8B800FF", "#18C898FF", "#F88048FF", "#C8C8C8FF", "#303028FF")
 names(colors.tax) <- c("p: Bacillota", "p: Bacteroidota", "p: Verrucomicrobiota", "p: Pseudomonadota", "p: Actinomycetota", "Other: Bacteria", "Other: Domains")
@@ -1048,11 +767,13 @@ gg.leg.exp.shape <- ggpubr::as_ggplot(ggpubr::get_legend(gg.leg.exp.shape))
 gg.leg.all <- gg.leg.gp + gg.leg.gp.tp + gg.leg.tax + gg.leg.exp + gg.leg.exp.shape + plot_layout(ncol = 1, heights = c(3, 5, 8, 4, 4))
 gg.leg.all
 
-png(filename = paste0(path.fg.dir, "/legends.png"), width = 5000 * .65, height = 5000 * 1, units = "px", res = 1200, type = "cairo")
-
-gg.leg.all
-
-dev.off()
+{
+  png(filename = paste0(path.fg.dir, "/legends.png"), width = 5000 * .65, height = 5000 * 1, units = "px", res = 1200, type = "cairo")
+  
+  gg.leg.all
+  
+  dev.off()
+}
 
 
 # Analysis ---------------------------------------------------------------------
@@ -1271,6 +992,7 @@ for (r in ranks) {
   
 }; rm(r)
 
+
 fun.get.rare.bp.core <- function(my.glom.tb.ls, my.metad, my.rank, my.group) {
   
   my.metad = my.metad %>% filter(donor_ethnicity == my.group)
@@ -1443,14 +1165,11 @@ fun.get.rare.bp.core.compm <- function(my.glom.tb.ls, my.metad, my.rank) {
                         value_var = "value",
                         only.sig = T,
                         alpha = 0.1, 
-                        label.type = "p.adj", 
-                        step.mult = 0.2) + 
-    xlab("") + ylab("FMT engraftment rate (%)<br>") +   
+                        label.type = "stars") + 
+    xlab("") + ylab("FMT engraftment rate (%)\n") +   
     scale_y_continuous(expand = expansion(mult = c(0.1, 0.35)), 
                        labels = scales::percent_format(accuracy = 1, suffix = "")) +
-    my.theme.2 +
-    theme(axis.ticks.x = element_blank(),
-          axis.text.x = element_blank()); gg.engraf.compm
+    theme(strip.text = element_blank()); gg.engraf.compm
   
   ls.pcoa <-
     
@@ -1477,11 +1196,13 @@ for (r in ranks) {
   
 }; rm(r)
 
-png(filename = paste0(path.fg.dir, "/engraftment/core-retained-compm.png"), width = 5000 * 2.5, height = 5000 * .75, units = "px", res = 1200, type = "cairo")
-
-print(wrap_plots(unlist(ls.engraf.gg)) +plot_layout(nrow = 1))
-
-dev.off()
+{
+  png(filename = paste0(path.fg.dir, "/engraftment/core-retained-compm.png"), width = 5000 * 2.75, height = 5000 * .8, units = "px", res = 1200, type = "cairo")
+  
+  print(wrap_plots(unlist(ls.engraf.gg)) + plot_layout(nrow = 1))
+  
+  dev.off()
+}
 
 
 ## Profiles --------------------------------------------------------------------
@@ -2048,8 +1769,9 @@ fun.get.beta.div <- function(my.glom.ps) {
       #              aes(x = PCoA1, y = PCoA2, color = donor_ethnicity_timepoint, fill = donor_ethnicity_timepoint),
       #              geom = "polygon", linetype = "blank", alpha = .15, show.legend = F, type = "norm") +
       geom_point(pcoa.site.score, 
-                 mapping = aes(x = PCoA1, y = PCoA2, color = donor_ethnicity_timepoint, fill = donor_ethnicity_timepoint, shape = experiment_type), 
-                 size = 2, alpha = .75) +
+                 mapping = aes(x = PCoA1, y = PCoA2, fill = donor_ethnicity_timepoint, 
+                               color = donor_ethnicity_timepoint, shape = experiment_type), 
+                 size = 2, alpha = 1) +
       annotate("richtext", x = Inf, y = -Inf, size = 2.5,
                label = paste0("PERMANOVA: *R*<sup>2</sup> = ", round(pcoa.perma.df.comp1[1, "R2"], 2), "; *p* = ", ifelse(pcoa.perma.df.comp1[1, "P"] < 0.001, "<0.001", sprintf("%1.3f", round(pcoa.perma.df.comp1[1, "P"], 3)))),
                fill = NA, label.color = NA, hjust = 1, vjust = 0, color = "red") +
@@ -2064,62 +1786,7 @@ fun.get.beta.div <- function(my.glom.ps) {
            y = paste0("PCoA2 (", round(pcoa.cmds$eig / sum(pcoa.cmds$eig) * 100, 2)[2], "%)<br>")) + 
       theme(plot.subtitle = element_blank(),
             legend.position = "none",
-            plot.margin = unit(c(0, 0.1, 0.1, 0.1), 'cm')) -> gg.pcoa.axes12
-    
-    gg.pcoa.axes12.param <- ggplot_build(gg.pcoa.axes12)
-    gg.pcoa.axes12.param.ylimits <- gg.pcoa.axes12.param$layout$panel_params[[1]]$y$continuous_range
-    gg.pcoa.axes12.param.xlimits <- gg.pcoa.axes12.param$layout$panel_params[[1]]$x$continuous_range
-    
-    pcoa.site.score.longer.axes12 <- 
-      pcoa.site.score %>% 
-      pivot_longer(cols = c("PCoA1", "PCoA2"), names_to = "PC", values_to = "value") %>% 
-      distinct()
-    
-    pcoa.site.score.summary.axes12 <-
-      pcoa.site.score.longer.axes12 %>% 
-      group_by(donor_ethnicity_timepoint, PC) %>% 
-      summarise(temp = list(c(psych::describe(value), quantile(value, na.rm = T), IQR = EnvStats::iqr(value, na.rm = T)))) %>% 
-      unnest_wider(temp) %>% 
-      select(-c(vars, trimmed, mad)) %>% 
-      mutate(across(where(is.numeric), ~case_when(is.nan(.) ~ NA_integer_, is.infinite(.) ~ NA_integer_,.default = .))) %>% 
-      data.frame(check.names = F) %>% 
-      arrange(PC, donor_ethnicity_timepoint)
-    
-    pcoa.site.score.kruskal.axes12 <- 
-      fun.get.kruskal(tb = pcoa.site.score.longer.axes12, gp_comp = "donor_ethnicity_timepoint", gp_facet = "PC", value_var = "value") %>% 
-      arrange(PC)
-    
-    pcoa.site.score.posthoc.axes12 <- 
-      fun.get.wilcox(tb = pcoa.site.score.longer.axes12, 
-                     tb.stat = pcoa.site.score.kruskal.axes12,
-                     gp_comp = "donor_ethnicity_timepoint", gp_facet = "PC", value_var = "value") %>% 
-      arrange(PC)
-    
-    pcoa.site.score.longer.axes12 %>% 
-      filter(PC == "PCoA1") %>% 
-      ggplot(., aes(x = donor_ethnicity_timepoint, y = value, fill = donor_ethnicity_timepoint, color = donor_ethnicity_timepoint)) +
-      geom_boxplot(width = 0.66, color = "black", outlier.size = 1, outlier.shape = 21, linewidth = 0.25) +
-      geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
-      scale_y_continuous(limits = c(gg.pcoa.axes12.param.xlimits[1], gg.pcoa.axes12.param.xlimits[2]), expand = c(0, 0)) +
-      scale_fill_manual(values = colors.gp.tp) + 
-      coord_flip() + 
-      theme_void() +
-      theme(legend.position = "none",
-            plot.margin = unit(c(0, 0, 0, 0), 'cm')) -> gg.pcoa.pc1.compm.axes12
-    
-    pcoa.site.score.longer.axes12 %>% 
-      filter(PC == "PCoA2") %>% 
-      ggplot(., aes(x = donor_ethnicity_timepoint, y = value, fill = donor_ethnicity_timepoint, color = donor_ethnicity_timepoint)) +
-      geom_boxplot(width = 0.66, color = "black", outlier.size = 1, outlier.shape = 21, linewidth = 0.25) +
-      geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
-      scale_y_continuous(limits = c(gg.pcoa.axes12.param.ylimits[1], gg.pcoa.axes12.param.ylimits[2]), expand = c(0, 0)) +
-      scale_color_manual(values = colors.gp.tp) + 
-      scale_fill_manual(values = colors.gp.tp) + 
-      theme_void() +
-      theme(legend.position = "none",
-            plot.margin = unit(c(0, 0, 0, 0), 'cm')) -> gg.pcoa.pc2.compm.axes12
-    
-    gg.pcoa.axes12.panel <- gg.pcoa.pc1.compm.axes12 + plot_spacer() + gg.pcoa.axes12 + gg.pcoa.pc2.compm.axes12 + plot_layout(ncol = 2, heights = c(.1, 1), widths = c(1, .1))
+            plot.margin = unit(c(0, 0.1, 0.1, 0.1), 'cm')) -> gg.pcoa.axes12; gg.pcoa.axes12
     
     # Axes 1:3
     
@@ -2128,11 +1795,9 @@ fun.get.beta.div <- function(my.glom.ps) {
       #              aes(x = PCoA1, y = PCoA3, color = donor_ethnicity_timepoint, fill = donor_ethnicity_timepoint),
       #              geom = "polygon", linetype = "blank", alpha = .15, show.legend = F, type = "norm") +
       geom_point(pcoa.site.score, 
-                 mapping = aes(x = PCoA1, y = PCoA3, color = donor_ethnicity_timepoint, fill = donor_ethnicity_timepoint, shape = experiment_type), 
-                 size = 2, alpha = .75) +
-      # annotate("richtext", x = Inf, y = -Inf, size = 2.5,
-      #          label = paste0("PERMANOVA: *R*<sup>2</sup> = ", round(pcoa.perma.df.comp1[1, "R2"], 2), "; *p* = ", ifelse(pcoa.perma.df.comp1[1, "P"] < 0.001, "<0.001", sprintf("%1.3f", round(pcoa.perma.df.comp1[1, "P"], 3)))),
-      #          fill = NA, label.color = NA, hjust = 1, vjust = 0) +
+                 mapping = aes(x = PCoA1, y = PCoA3, fill = donor_ethnicity_timepoint, 
+                               color = donor_ethnicity_timepoint, shape = experiment_type), 
+                 size = 2, alpha = 1) +
       geom_vline(xintercept = 0, linewidth = 0.25, linetype = "dotted") +
       geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
       scale_y_continuous(expand = expansion(mult = c(0.25, 0.05))) +
@@ -2144,62 +1809,17 @@ fun.get.beta.div <- function(my.glom.ps) {
            y = paste0("PCoA3 (", round(pcoa.cmds$eig / sum(pcoa.cmds$eig) * 100, 2)[3], "%)<br>")) + 
       theme(plot.subtitle = element_blank(),
             legend.position = "none",
-            plot.margin = unit(c(0, 0.1, 0.1, 0.1), 'cm')) -> gg.pcoa.axes13
+            plot.margin = unit(c(0, 0.1, 0.1, 0.1), 'cm')) -> gg.pcoa.axes13; gg.pcoa.axes13
     
-    gg.pcoa.axes13.param <- ggplot_build(gg.pcoa.axes13)
-    gg.pcoa.axes13.param.ylimits <- gg.pcoa.axes13.param$layout$panel_params[[1]]$y$continuous_range
-    gg.pcoa.axes13.param.xlimits <- gg.pcoa.axes13.param$layout$panel_params[[1]]$x$continuous_range
+    gg.pcoa.panel <- gg.pcoa.axes12 + gg.pcoa.axes13
     
-    pcoa.site.score.longer.axes13 <- 
-      pcoa.site.score %>% 
-      pivot_longer(cols = c("PCoA1", "PCoA3"), names_to = "PC", values_to = "value") %>% 
-      distinct()
-    
-    pcoa.site.score.summary.axes13 <-
-      pcoa.site.score.longer.axes13 %>% 
-      group_by(donor_ethnicity_timepoint, PC) %>% 
-      summarise(temp = list(c(psych::describe(value), quantile(value, na.rm = T), IQR = EnvStats::iqr(value, na.rm = T)))) %>% 
-      unnest_wider(temp) %>% 
-      select(-c(vars, trimmed, mad)) %>% 
-      mutate(across(where(is.numeric), ~case_when(is.nan(.) ~ NA_integer_, is.infinite(.) ~ NA_integer_,.default = .))) %>% 
-      data.frame(check.names = F) %>% 
-      arrange(PC, donor_ethnicity_timepoint)
-    
-    pcoa.site.score.kruskal.axes13 <- 
-      fun.get.kruskal(tb = pcoa.site.score.longer.axes13, gp_comp = "donor_ethnicity_timepoint", gp_facet = "PC", value_var = "value") %>% 
-      arrange(PC)
-    
-    pcoa.site.score.posthoc.axes13 <- 
-      fun.get.wilcox(tb = pcoa.site.score.longer.axes13, 
-                     tb.stat = pcoa.site.score.kruskal.axes13,
-                     gp_comp = "donor_ethnicity_timepoint", gp_facet = "PC", value_var = "value") %>% 
-      arrange(PC)
-    
-    pcoa.site.score.longer.axes13 %>% 
-      filter(PC == "PCoA1") %>% 
-      ggplot(., aes(x = donor_ethnicity_timepoint, y = value, fill = donor_ethnicity_timepoint, color = donor_ethnicity_timepoint)) +
-      geom_boxplot(width = 0.66, color = "black", outlier.size = 1, outlier.shape = 21, linewidth = 0.25) +
-      geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
-      scale_y_continuous(limits = c(gg.pcoa.axes13.param.xlimits[1], gg.pcoa.axes13.param.xlimits[2]), expand = c(0, 0)) +
-      scale_fill_manual(values = colors.gp.tp) + 
-      coord_flip() + 
-      theme_void() +
-      theme(legend.position = "none",
-            plot.margin = unit(c(0, 0, 0, 0), 'cm')) -> gg.pcoa.pc1.compm.axes13
-    
-    pcoa.site.score.longer.axes13 %>% 
-      filter(PC == "PCoA3") %>% 
-      ggplot(., aes(x = donor_ethnicity_timepoint, y = value, fill = donor_ethnicity_timepoint, color = donor_ethnicity_timepoint)) +
-      geom_boxplot(width = 0.66, color = "black", outlier.size = 1, outlier.shape = 21, linewidth = 0.25) +
-      geom_hline(yintercept = 0, linewidth = 0.25, linetype = "dotted") +
-      scale_y_continuous(limits = c(gg.pcoa.axes13.param.ylimits[1], gg.pcoa.axes13.param.ylimits[2]), expand = c(0, 0)) +
-      scale_color_manual(values = colors.gp.tp) + 
-      scale_fill_manual(values = colors.gp.tp) + 
-      theme_void() +
-      theme(legend.position = "none",
-            plot.margin = unit(c(0, 0, 0, 0), 'cm')) -> gg.pcoa.pc2.compm.axes13
-    
-    gg.pcoa.axes13.panel <- gg.pcoa.pc1.compm.axes13 + plot_spacer() + gg.pcoa.axes13 + gg.pcoa.pc2.compm.axes13 + plot_layout(ncol = 2, heights = c(.1, 1), widths = c(1, .1))
+    {
+      png(filename = paste0(path.fg.dir, "/diversity/beta-div-pcoa-", str_to_lower(bdiv.indexes[[i]]), ".png"), width = 5000 * 1.5, height = 5000 * .75, units = "px", res = 1200, type = "cairo")
+      
+      print(gg.pcoa.panel)
+      
+      dev.off()
+    }
     
     pcoa.disp.comp2 <- 
       betadisper(d = pcoa.dist, group = my.metad$donor_ethnicity_timepoint, type = "centroid")$distances %>% 
@@ -2207,7 +1827,7 @@ fun.get.beta.div <- function(my.glom.ps) {
       dplyr::rename("value" = ".") %>% 
       rownames_to_column("sample_id") %>% 
       merge(my.metad, .) %>% 
-      mutate(var = "Within-group\ndispersion")
+      mutate(var = "Within-group dispersion")
     
     pcoa.disp.summary.comp2 <- 
       fun.get.summary(tb = pcoa.disp.comp2, gp_comp = "donor_ethnicity_timepoint", gp_facet = "var", value_var = "value")
@@ -2219,10 +1839,6 @@ fun.get.beta.div <- function(my.glom.ps) {
       fun.get.wilcox(tb = pcoa.disp.comp2, gp_comp = "donor_ethnicity_timepoint", gp_facet = "var", value_var = "value",
                      p_adjust_method = "fdr", conf_level = 0.95, tb.stat = pcoa.disp.kruskal.comp2, alpha.global = 0.05)
     
-    # pcoa.disp.compm.comp2 <-
-    #   fun.get.wilcox(tb = pcoa.disp.comp2, gp_comp = "donor_ethnicity", gp_facet = "var", value_var = "value",
-    #                  p_adjust_method = "fdr", conf_level = 0.95, tb.stat = NULL, alpha.global = 0.05)
-    
     gg.pcoa.disp.compm.comp2 <- 
       fun.get.boxp.compm3(tb = pcoa.disp.comp2, 
                           #tb.compm = pcoa.disp.compm.comp2,
@@ -2233,24 +1849,24 @@ fun.get.beta.div <- function(my.glom.ps) {
                           gp_fill = "donor_ethnicity_timepoint",
                           gp_shape = "experiment_type",
                           value_var = "value",
-                          only.sig = T,
+                          only.sig = T, 
                           alpha = 0.1, 
-                          label.type = "p.adj", 
-                          step.mult = 0.1)
+                          label.type = "stars") + 
+      ylab(paste0("Within-group dispersion\n")) +  
+      theme(strip.text = element_blank())
     
     gg.pcoa.panel <- 
-      gg.pcoa.pc1.compm.axes12 + plot_spacer() + plot_spacer() + gg.pcoa.pc1.compm.axes13 + plot_spacer() + plot_spacer() +
-      gg.pcoa.axes12 + gg.pcoa.pc2.compm.axes12 + plot_spacer() + gg.pcoa.axes13 + gg.pcoa.pc2.compm.axes13 + gg.pcoa.disp.compm.comp2 + plot_layout(ncol = 6, heights = c(.1, 1), widths = c(1, .1, .05, 1, .1, .5))
+      gg.pcoa.disp.compm.comp2 + plot_spacer() + 
+      plot_layout(nrow = 1, widths = c(65, 35))
     
-    print(gg.pcoa.panel)
-    
-    
-    #Saving graphs
-    png(filename = paste0(path.fg.dir, "/diversity/beta-div-", str_to_lower(bdiv.indexes[[i]]), ".png"), width = 5000 * 2.25, height = 5000 * 1, units = "px", res = 1200, type = "cairo")
-    
-    print(gg.pcoa.panel)
-    
-    dev.off()
+    {
+      png(filename = paste0(path.fg.dir, "/diversity/beta-div-disp-", str_to_lower(bdiv.indexes[[i]]), ".png"), width = 5000 * 1.05, height = 5000 * .8, units = "px", res = 1200, type = "cairo")
+      
+      print(gg.pcoa.panel)
+      
+      dev.off()
+      
+      }
     
     ls.pcoa <-
       
@@ -2258,10 +1874,6 @@ fun.get.beta.div <- function(my.glom.ps) {
         "PERMANOVA" = pcoa.perma.df.comp1,
         
         "PERMANOVA (post-hoc)" = pcoa.perma.ph,
-        
-        "PC1 (Summary)" = pcoa.site.score.posthoc.axes12 %>% filter(PC == "PCoA1"),
-        "PC2 (Summary)" = pcoa.site.score.posthoc.axes12 %>% filter(PC == "PCoA2"),
-        "PC3 (Summary)" = pcoa.site.score.posthoc.axes13 %>% filter(PC == "PCoA3"),
         
         "Dispersion (Measures)" = pcoa.disp.comp2,
         "Dispersion (Summary)" = pcoa.disp.summary.comp2,
@@ -2276,15 +1888,10 @@ fun.get.beta.div <- function(my.glom.ps) {
   
 }
 
-bdiv.indexes <- c("bray", "jaccard")
-names(bdiv.indexes) <- c("Bray—Curtis", "Jaccard")
+bdiv.indexes <- c("bray")
+names(bdiv.indexes) <- c("Bray—Curtis")
 
 fun.get.beta.div(ps.table)
-
-bdiv.indexes <- c("euclidean")
-names(bdiv.indexes) <- c("Euclidean")
-
-fun.get.beta.div(microbiome::transform(ps.table, "clr"))
 
 rm(list = ls(pattern = "[.]?beta[.]?"))
 rm(list = ls(pattern = "[.]?bdiv[.]?"))
